@@ -1,0 +1,17 @@
+{
+  "name": "kdt-lib/queue",
+  "require-dev": {
+    "phpunit/phpunit": "5.2.9"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kdt\\Iron\\Queue\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "files": ["tests/classes/env.php"],
+    "psr-4": {
+      "Kdt\\Iron\\Queue\\Tests\\": "tests"
+    }
+  }
+}
