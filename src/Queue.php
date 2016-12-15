@@ -75,11 +75,11 @@ class Queue
     /**
      * queue subscribe
      * @param $topic
-     * @param Closure $callback
+     * @param callable $callback
      * @param $options
      * @return string
      */
-    public static function pop($topic, Closure $callback, $options = [])
+    public static function pop($topic, callable $callback, $options = [])
     {
         // options
         $options['auto_delete'] = isset($options['auto_delete']) ? $options['auto_delete'] : false;

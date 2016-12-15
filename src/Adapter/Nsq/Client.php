@@ -507,7 +507,6 @@ class Client implements AdapterInterface
 
             // lookupd pool
             $lookupdServers = [];
-            $lookupdDSNs = [];
             $lookupdPool = [];
             $lookupdBiz = $config['lookupd_pool'];
             foreach ($lookupdBiz as $arrayKey => $arrayVal)
@@ -526,8 +525,7 @@ class Client implements AdapterInterface
                     $rwLimit = $arrayVal;
                 }
 
-                $lookupdDSN = $this->getLookupdDSN($lookupdName);
-                $lookupdDSNs[$lookupdDSN] = $lookupdName;
+                $lookupdDSN = '@self';
                 $lookupdServers[$lookupdName] = $lookupdDSN;
 
                 // rw pool
@@ -555,7 +553,7 @@ class Client implements AdapterInterface
                     foreach ($rwStrategy[$topicBiz] as $lookupdName => $rwLimit)
                     {
                         $appendR = $appendW = $removeR = $removeW = false;
-                        $lookupdDSN = $this->getLookupdDSN($lookupdName);
+                        $lookupdDSN = '@self';
                         switch ($rwLimit)
                         {
                             case 'r':
@@ -591,7 +589,7 @@ class Client implements AdapterInterface
                         }
                     }
                 }
-                $mapping[$topicBiz] = ['group' => $relateGroup, 'name' => $topicBiz, 'topic' => $topicNsq, 'lookups' => $lookupdCopy];
+                $mapping[$topicBiz] = ['scope' => $scopeName, 'group' => $relateGroup, 'name' => $topicBiz, 'topic' => $topicNsq, 'lookups' => $lookupdCopy];
             }
 
             $this->topicMapCaches[$scopeName] = $mapping;
@@ -769,88 +767,273 @@ class Client implements AdapterInterface
     }
 
     /**
-     * @param $name
+     * @param $config
+     * @return array
+     */
+    private function getLookupdDSNs($config)
+    {
+        $scope = $config['scope'];
+        $topic = $config['topic'];
+        $lookupLists = $config['lookups'];
+
+        $DSNsPool = [];
+
+        $pipes = ['r', 'w'];
+        foreach ($pipes as $pipe)
+        {
+            if (isset($lookupLists[$pipe]))
+            {
+                $DSNsDynamic = [];
+                $DSNsStatic = [];
+
+                $lookupChannel = $lookupLists[$pipe];
+                foreach ($lookupChannel as $clusterName => $providerDSN)
+                {
+                    if ($providerDSN == '@self')
+                    {
+                        list($provideDSNs, $dynamic) = $this->getLookupdDSN($clusterName, $pipe, $scope, $topic);
+                        if ($dynamic)
+                        {
+                            $DSNsDynamic[$clusterName] = $provideDSNs;
+                        }
+                        else
+                        {
+                            $DSNsStatic[$clusterName] = $provideDSNs;
+                        }
+                    }
+                    else
+                    {
+                        $DSNsStatic[$clusterName] = [$providerDSN];
+                    }
+                }
+
+                if ($DSNsDynamic)
+                {
+                    // ignore static config
+                    $DSNsPool[$pipe] = $DSNsDynamic;
+                }
+                else
+                {
+                    $DSNsPool[$pipe] = $DSNsStatic;
+                }
+            }
+        }
+
+        return $DSNsPool;
+    }
+
+    /**
+     * @param $cluster
+     * @param $pipe
+     * @param $scope
+     * @param $topic
      *
      * @return string
      */
-    private function getLookupdDSN($name)
+    private function getLookupdDSN($cluster, $pipe = null, $scope = null, $topic = null)
     {
-        if (isset($this->lookupDSNs[$name]))
+        if (isset($this->lookupDSNs[$cluster]))
         {
-            return $this->lookupDSNs[$name];
+            return $this->lookupDSNs[$cluster];
         }
 
-        $finalDSN = $config = $this->getLookupdBalanced(Config::get('nsq.server.lookupd.'.$name));
-        $this->getLogger()->debug('GOT Lookupd DSN ~ origin ~ '.$name.' -> '.$finalDSN);
+        $viaDynamic = false;
 
-        // for DCC
-        // TODO will refactor
+        $extDSNs = [];
 
-        list($protocol, $path, $ext) = explode(':', $config);
+        $config = $this->getLookupdBalanced(Config::get('nsq.server.lookupd.'.$cluster));
 
-        if ($protocol == 'dcc')
+        if (is_numeric(strpos($config, '://')))
         {
-            list($app, $module) = explode('~', $path);
-            list($action, $args) = explode('?', $ext);
+            // new syntax like "http://lookupd.domain.dns:4161"
+            $mainDSN = $config;
+        }
+        else
+        {
+            // old syntax like "http:lookupd.domain.dns:4161"
+            list($lgProtocol, $lgPath, $lgExt) = explode(':', $config);
+            // upgrade to new syntax
+            $mainDSN = sprintf('%s://%s:%s', $lgProtocol, $lgPath, $lgExt);
+        }
 
-            $dynGot = false;
+        $this->getLogger()->debug('GOT Lookupd DSN ~ origin ~ '.$cluster.' -> '.$mainDSN);
 
-            $dynList = DCC::gets([$app, $module]);
+        $DSNParsed = parse_url($mainDSN);
 
-            if ($dynList)
+        if ($DSNParsed['scheme'] == 'dcc')
+        {
+            $parameters = [];
+            parse_str($DSNParsed['query'], $parameters);
+
+            list($app, $module) = explode('~', $parameters['query']);
+
+            $clusterSIGN = '';
+            $cSepPos = strpos($cluster, '-');
+            if (is_numeric($cSepPos))
             {
-                $lookupNodes = array_values($dynList);
+                $clusterSIGN = '_'.substr($cluster, $cSepPos + 1);
+            }
 
-                if ($lookupNodes && shuffle($lookupNodes))
+            $defaultKey = '##_default'.$clusterSIGN;
+            $topicKey = $topic;
+
+            $clientRole = $pipe == 'r' ? 'consumer' : 'producer';
+
+            $cloudStrategy = DCC::gets([sprintf($app, $scope), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
+
+            $usedStrategy =
+                isset($cloudStrategy[$topicKey])
+                    ? $cloudStrategy[$topicKey]
+                    : (isset($cloudStrategy[$defaultKey]) ? $cloudStrategy[$defaultKey] : null);
+
+            if ($usedStrategy)
+            {
+                $usedStrategy = json_decode($usedStrategy, TRUE);
+
+                $producerTargets = [];
+
+                if (isset($usedStrategy['previous']) && $usedStrategy['previous'])
                 {
-                    $pickedNode = current($lookupNodes);
+                    if ($clientRole == 'consumer')
+                    {
+                        $extDSNs[] = $this->getLookupdBalanced($usedStrategy['previous']);
+                    }
 
-                    list($protocol, $path) = explode('://', $pickedNode);
-                    list($host, $port) = explode(':', $path);
+                    if ($clientRole == 'producer')
+                    {
+                        $producerTargets['previous'] = $usedStrategy['previous'];
+                    }
+                }
 
-                    $finalDSN = implode(':', [$protocol, $host, $port ?: 80]);
+                if (isset($usedStrategy['current']) && $usedStrategy['current'])
+                {
+                    if ($clientRole == 'consumer')
+                    {
+                        $extDSNs[] = $this->getLookupdBalanced($usedStrategy['current']);
+                    }
 
-                    $dynGot = true;
+                    if ($clientRole == 'producer')
+                    {
+                        $producerTargets['current'] = $usedStrategy['current'];
+                    }
+                }
+
+                if ($producerTargets)
+                {
+                    if (isset($usedStrategy['gradation']) && $usedStrategy['gradation'])
+                    {
+                        $grayHosts = $usedStrategy['gradation'];
+                        $localHost = gethostname();
+
+                        if (isset($grayHosts[$localHost]))
+                        {
+                            $grayRule = $grayHosts[$localHost];
+                        }
+                        else if (isset($grayHosts['*']))
+                        {
+                            $grayRule = $grayHosts[$localHost];
+                        }
+                        else
+                        {
+                            $grayRule = null;
+                        }
+
+                        if ($grayRule)
+                        {
+                            $grayHit = false;
+                            if (isset($grayRule['percent']))
+                            {
+                                $grayPercentK = round($grayRule['percent'], 3) * 1000;
+                                if ($grayPercentK <= rand(0, 100000))
+                                {
+                                    $grayHit = true;
+                                }
+                            }
+
+                            if ($grayHit)
+                            {
+                                $extDSNs[] = $this->getLookupdBalanced($producerTargets['current']);
+                            }
+                            else
+                            {
+                                $extDSNs[] = $this->getLookupdBalanced($producerTargets['previous']);
+                            }
+                        }
+                        else
+                        {
+                            $extDSNs[] = $this->getLookupdBalanced($producerTargets['previous']);
+                        }
+                    }
+                    else
+                    {
+                        if (isset($producerTargets['current']))
+                        {
+                            $extDSNs[] = $this->getLookupdBalanced($producerTargets['current']);
+                        }
+                        else if (isset($producerTargets['previous']))
+                        {
+                            $extDSNs[] = $this->getLookupdBalanced($producerTargets['previous']);
+                        }
+                    }
                 }
             }
 
-            // -> fallback
-
-            if (false === $dynGot)
+            if ($extDSNs)
             {
-                if ($action == 'fallback')
+                $viaDynamic = true;
+                if (count($extDSNs) == 1)
                 {
-                    $finalDSN = str_replace('#', ':', $args);
+                    $mainDSN = current($extDSNs);
+                    $extDSNs = [];
+                }
+            }
+            else
+            {
+                // -> fallback
+                if (isset($parameters['fallback']))
+                {
+                    $mainDSN = $parameters['fallback'];
                 }
             }
         }
 
-        // for SQS-HA
-
-        list($_, $host, $port) = explode(':', $finalDSN);
-
-        // force to discovery
-        $dynNodes = $this->getMemCache()->host(
-            sprintf($this->mcLookupdNodesKey, $name),
-            function() use ($host, $port) {
-                return (new Cluster($host, $port))->getSlaves();
-            },
-            $this->getGlobalSetting('nsq.mem-cache.lookupdNodesTTL', $this->mcLookupdNodesTTL)
-        );
-        if ($dynNodes)
+        if (empty($extDSNs))
         {
-            $picked = $dynNodes[rand(0, count($dynNodes) - 1)];
-            $parsed = parse_url($picked);
-            if (isset($parsed['scheme']) && isset($parsed['host']))
+            // for SQS-HA
+
+            list($_, $host, $port) = explode(':', $mainDSN);
+
+            // force to discovery
+            $discNodes = $this->getMemCache()->host(
+                sprintf($this->mcLookupdNodesKey, $cluster),
+                function() use ($host, $port) {
+                    return (new Cluster($host, $port))->getSlaves();
+                },
+                $this->getGlobalSetting('nsq.mem-cache.lookupdNodesTTL', $this->mcLookupdNodesTTL)
+            );
+            if ($discNodes)
             {
-                $finalDSN = implode(':', [$parsed['scheme'], $parsed['host'], isset($parsed['port']) ? $parsed['port'] : 80]);
-                $this->getLogger()->debug('GOT Lookupd DSN ~ discovered ~ '.$name.' -> '.$finalDSN);
+                $picked = $discNodes[rand(0, count($discNodes) - 1)];
+                $parsed = parse_url($picked);
+                if (isset($parsed['scheme']) && isset($parsed['host']))
+                {
+                    $mainDSN = implode(':', [$parsed['scheme'], $parsed['host'], isset($parsed['port']) ? $parsed['port'] : 80]);
+                    $this->getLogger()->debug('GOT Lookupd DSN ~ discovered ~ '.$cluster.' -> '.$mainDSN);
+                }
             }
         }
 
-        $finalDSN && $this->lookupDSNs[$name] = $finalDSN;
+        if ($mainDSN)
+        {
+            $mergedDSNs = $extDSNs ? array_merge([$mainDSN], $extDSNs) : [$mainDSN];
+            $this->lookupDSNs[$cluster] = [$mergedDSNs, $viaDynamic];
+        }
+        else
+        {
+            $mergedDSNs = [];
+        }
 
-        return $finalDSN;
+        return [$mergedDSNs, $viaDynamic];
     }
 
     /**
@@ -890,7 +1073,13 @@ class Client implements AdapterInterface
         else
         {
             $IOSplitter = new IOSplitter();
-            if ($IOSplitter->registerLogger($this->getLogger()) && $IOSplitter->registerProxy($this->fetchProxy($usage)) && $IOSplitter->registerLookupd($topicConfig['lookups']))
+            if (
+                $IOSplitter->registerLogger($this->getLogger())
+                &&
+                $IOSplitter->registerProxy($this->fetchProxy($usage))
+                &&
+                $IOSplitter->registerLookupd($this->getLookupdDSNs($topicConfig))
+            )
             {
                 $this->lookupInstances[$usage][$topicConfig['group']] = $instance = $IOSplitter;
             }
