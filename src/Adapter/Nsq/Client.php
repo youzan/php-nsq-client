@@ -147,6 +147,22 @@ class Client implements AdapterInterface
     private $mcLookupdNodesTTL = 45;
 
     /**
+     * @var string
+     */
+    private $insTypePUB = '#pub';
+
+    /**
+     * @var string
+     */
+    private $insTypeSUB = '#sub';
+
+    /**
+     * @TODO This api should be deprecated
+     * @var string
+     */
+    private $insTypeSTAT = '#stat';
+
+    /**
      * @param $topic
      * @param $message
      * @return array
@@ -155,7 +171,7 @@ class Client implements AdapterInterface
     {
         return $this->pubRetrying($topic, function () use ($topic, $message) {
             $pubTopic = $this->parseTopic($topic);
-            $nsq = $this->findInstance($this->findTopicUsage($topic), $topic);
+            $nsq = $this->findInstance($this->insTypePUB, $this->findTopicUsage($topic), $topic);
             return $nsq->publishTo($this->fetchPubNodes($nsq, $pubTopic, $message), $this->detectPushType())->publish($pubTopic, $this->getNsqMsgObject($pubTopic, $message));
         });
     }
@@ -174,7 +190,7 @@ class Client implements AdapterInterface
             {
                 $bag[] = $this->getNsqMsgObject($pubTopic, $message);
             }
-            $nsq = $this->findInstance($this->findTopicUsage($topic), $topic);
+            $nsq = $this->findInstance($this->insTypePUB, $this->findTopicUsage($topic), $topic);
             return $nsq->publishTo($this->fetchPubNodes($nsq, $pubTopic), $this->detectPushType())->publish($pubTopic, $bag);
         });
     }
@@ -264,6 +280,7 @@ class Client implements AdapterInterface
                 }
                 else
                 {
+                    $this->detectAndResetLookupCache($e, $this->insTypePUB);
                     $this->resetPubNodes($this->parseTopic($topic));
                     return $this->pubRetrying($topic, $processor);
                 }
@@ -296,7 +313,7 @@ class Client implements AdapterInterface
         $subTopic = $this->parseTopic($topic);
         // sub
         $subStartTime = Time::stamp();
-        $nsq = $this->findInstance();
+        $nsq = $this->findInstance($this->insTypeSUB);
         try
         {
             $nsq
@@ -345,6 +362,8 @@ class Client implements AdapterInterface
                     $this->getLogger()->info('[IRON] SUB-KS checking error : ['.$subTopic.':'.$channel.'] ~ ['.$options['keep_seconds'].':'.$lastKeepSeconds.'] ~ fixed');
                     $options['keep_seconds'] = $lastKeepSeconds;
                 }
+                // lookup cache fix
+                $this->detectAndResetLookupCache($e, $this->insTypeSUB);
                 // make delay
                 sleep($options['retry_delay']);
                 // retrying
@@ -364,7 +383,7 @@ class Client implements AdapterInterface
      */
     public function stop()
     {
-        $nsq = $this->findInstance();
+        $nsq = $this->findInstance($this->insTypeSUB);
         $nsq->stop();
     }
 
@@ -374,7 +393,7 @@ class Client implements AdapterInterface
      */
     public function delete($messageId)
     {
-        $nsq = $this->findInstance();
+        $nsq = $this->findInstance($this->insTypeSUB);
         return $nsq->deleteMessage($messageId);
     }
 
@@ -400,7 +419,7 @@ class Client implements AdapterInterface
      */
     public function close()
     {
-        $nsq = $this->findInstance();
+        $nsq = $this->findInstance($this->insTypeSUB);
         $nsq->close();
     }
 
@@ -416,7 +435,7 @@ class Client implements AdapterInterface
         
         try {
             
-            $nsq = $this->findInstance($this->findTopicUsage($topic), $topic);
+            $nsq = $this->findInstance($this->insTypeSTAT, $this->findTopicUsage($topic), $topic);
             
             $hosts = $this->fetchPubNodes($nsq, $pubTopic);
             
@@ -710,16 +729,46 @@ class Client implements AdapterInterface
     }
 
     /**
+     * @TODO temp action for operate lookup to offline
+     * @param Exception $exception
+     * @param string $insType
+     */
+    private function detectAndResetLookupCache(Exception $exception, $insType)
+    {
+        if ($exception instanceof LookupException)
+        {
+            unset($this->topicMapCaches);
+
+            if (isset($this->nsqInstances[$insType]))
+            {
+                unset($this->nsqInstances[$insType]);
+            }
+
+            unset($this->lookupInstances);
+
+            $memCacheKeys = array_keys($this->lookupDSNs);
+
+            foreach ($memCacheKeys as $clusterName)
+            {
+                $this->getMemCache()->del(sprintf($this->mcLookupdNodesKey, $clusterName));
+            }
+
+            unset($this->lookupDSNs);
+        }
+    }
+
+    /**
      * 获取可用的nsqd服务
+     * @param string $insType
      * @param string $usage
      * @param string $topic
      * @return nsqphp
      * @throws Exception
      * @throws \Exception_System
      */
-    private function findInstance($usage = 'via-socket', $topic = null)
+    private function findInstance($insType, $usage = 'via-socket', $topic = null)
     {
-        if (is_null($topic))
+        if (is_null($topic) && $insType == $this->insTypeSUB)
         {
             if (is_null($this->lastPoppingTopic))
             {
@@ -731,13 +780,13 @@ class Client implements AdapterInterface
             }
         }
         $topicConfig = $this->getTopicConfig($this->parseTopicSign($topic));
-        if (isset($this->nsqInstances[$usage][$topicConfig['group']]))
+        if (isset($this->nsqInstances[$insType][$usage][$topicConfig['group']]))
         {
-            $instance = $this->nsqInstances[$usage][$topicConfig['group']];
+            $instance = $this->nsqInstances[$insType][$usage][$topicConfig['group']];
         }
         else
         {
-            $this->nsqInstances[$usage][$topicConfig['group']] = $instance = $this->createInstance($this->fetchLookupd($usage, $topicConfig), $this->fetchProxy($usage));
+            $this->nsqInstances[$insType][$usage][$topicConfig['group']] = $instance = $this->createInstance($this->fetchLookupd($usage, $topicConfig), $this->fetchProxy($usage));
         }
         return $instance;
     }
