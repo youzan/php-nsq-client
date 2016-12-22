@@ -64,7 +64,7 @@ class Logger implements LoggerInterface
      */
     private function getLogger()
     {
-        return Log::getInstance(\Exception_Handler::SYS_APP_NAME, 'nsq.client');
+        return Log::getInstance('php-framework', 'nsq.client');
     }
 
     /**

@@ -22,8 +22,16 @@ trait SingleInstance
     {
         if (is_null(self::$instanceObject))
         {
-            self::$instanceObject = new static;
+            self::$instanceObject = self::newInstance();
         }
         return self::$instanceObject;
+    }
+
+    /**
+     * @return static
+     */
+    public static function newInstance()
+    {
+        return new static;
     }
 }

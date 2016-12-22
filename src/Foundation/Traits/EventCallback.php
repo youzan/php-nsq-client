@@ -12,6 +12,9 @@ use Exception as SysException;
 
 trait EventCallback
 {
+    /**
+     * @var array
+     */
     private $regEventCallbacks = [];
 
     /**
