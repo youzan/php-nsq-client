@@ -86,7 +86,6 @@ class Queue
         $options['keep_seconds'] = self::filterKeepSeconds(isset($options['keep_seconds']) ? $options['keep_seconds'] : self::$maxKeepSeconds);
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
         $options['retry_delay'] = isset($options['retry_delay']) ? $options['retry_delay'] : 5;
-        $options['exception_observer'] = isset($options['exception_observer']) ? $options['exception_observer'] : null;
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
         // pop
         return self::nsq()->pop
