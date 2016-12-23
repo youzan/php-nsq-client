@@ -47,7 +47,7 @@ class Config
         }
         else
         {
-            throw new InvalidConfigException(9999, 'Parsing topic name failed');
+            throw new InvalidConfigException('Parsing topic name failed', 9999);
         }
     }
 
@@ -68,7 +68,7 @@ class Config
         }
         else
         {
-            throw new InvalidConfigException(9999, 'Missing required topic config');
+            throw new InvalidConfigException('Missing required topic config', 9998);
         }
     }
 
@@ -132,7 +132,7 @@ class Config
             }
             else
             {
-                throw new InvalidConfigException(9999, 'Missing nsq-topic config file');
+                throw new InvalidConfigException('Missing nsq-topic config file', 9997);
             }
 
             // lookupd pool

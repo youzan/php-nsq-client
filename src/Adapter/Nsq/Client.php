@@ -50,14 +50,14 @@ class Client implements AdapterInterface
      */
     public function push($topic, $message)
     {
-        $result = HA::getInstance()->pubRetrying($topic, function () use ($topic, $message) {
+        $result = HA::getInstance()->pubRetrying(function () use ($topic, $message) {
 
             return InstanceMgr::getPubInstance($topic)->publish(
                 $this->config->parseTopicName($topic),
                 $this->msgFilter->getMsgObject($topic, $message)
             );
 
-        });
+        }, $topic);
 
         return $this->makePubResult($topic, $result);
     }
@@ -69,7 +69,7 @@ class Client implements AdapterInterface
      */
     public function bulk($topic, array $messages)
     {
-        $result = HA::getInstance()->pubRetrying($topic, function () use ($topic, $messages) {
+        $result = HA::getInstance()->pubRetrying(function () use ($topic, $messages) {
 
             $bag = [];
             foreach ($messages as $message)
@@ -82,7 +82,7 @@ class Client implements AdapterInterface
                 $bag
             );
 
-        });
+        }, $topic);
 
         return $this->makePubResult($topic, $result);
     }
@@ -130,7 +130,7 @@ class Client implements AdapterInterface
 
             return false;
 
-        }, $options['keep_seconds'], $options['max_retry'], $options['retry_delay'], $identify);
+        }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);
     }
 
     /**

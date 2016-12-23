@@ -130,23 +130,30 @@ class Router
         }
         else
         {
-            $foundNodes = $this->cache->host(
-                sprintf($this->cLookupdNodesKey, $seedHost, $seedPort),
-                function() use ($seedHost, $seedPort) {
-                    return (new Cluster($seedHost, $seedPort))->getSlaves();
-                },
-                $this->config->getGlobalSetting('nsq.mem-cache.lookupdNodesTTL', $this->cLookupdNodesTTL)
-            ) ?: [];
-
-            foreach ($foundNodes as $idx => $nodeURL)
+            try
             {
-                if (filter_var($nodeURL, FILTER_VALIDATE_URL) === false)
-                {
-                    unset($foundNodes[$idx]);
-                }
-            }
+                $foundNodes = $this->cache->host(
+                    sprintf($this->cLookupdNodesKey, $seedHost, $seedPort),
+                    function() use ($seedHost, $seedPort) {
+                        return (new Cluster($seedHost, $seedPort))->getSlaves();
+                    },
+                    $this->config->getGlobalSetting('nsq.mem-cache.lookupdNodesTTL', $this->cLookupdNodesTTL)
+                ) ?: [];
 
-            $this->l2Cache[$cKey] = $foundNodes;
+                foreach ($foundNodes as $idx => $nodeURL)
+                {
+                    if (filter_var($nodeURL, FILTER_VALIDATE_URL) === false)
+                    {
+                        unset($foundNodes[$idx]);
+                    }
+                }
+
+                $this->l2Cache[$cKey] = $foundNodes;
+            }
+            catch (SysException $e)
+            {
+                $foundNodes = [];
+            }
         }
 
         return $foundNodes;

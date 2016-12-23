@@ -83,11 +83,19 @@ class DSN
     }
 
     /**
+     * @return void
+     */
+    public function clearCaches()
+    {
+        unset($this->cachedDSNs);
+    }
+
+    /**
      * @param SysException $e
      */
     public function cleanWhenSrvRetrying(SysException $e)
     {
-        unset($this->cachedDSNs);
+        $this->clearCaches();
     }
 
     /**
@@ -151,7 +159,7 @@ class DSN
         }
         else
         {
-            throw new InvalidConfigException('Illegal lookupd pool info');
+            throw new InvalidConfigException('Illegal lookupd pool info', 9996);
         }
     }
 }

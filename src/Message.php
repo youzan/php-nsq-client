@@ -145,7 +145,7 @@ class Message implements MessageInterface
         }
         else
         {
-            throw new InvalidParameterException('NSQ traceID must be an integer');
+            throw new InvalidParameterException('NSQ traceID must be an integer', 9985);
         }
         return $this;
     }
@@ -163,7 +163,7 @@ class Message implements MessageInterface
         }
         else
         {
-            throw new InvalidParameterException('NSQ shardingProof must be an integer');
+            throw new InvalidParameterException('NSQ shardingProof must be an integer', 9986);
         }
         return $this;
     }

@@ -30,14 +30,15 @@ class HA
     const EVENT_RETRYING = 'srv_e_retry';
 
     /**
-     * @param $topic
      * @param callable $processor
+     * @param $identify
      * @param $retryMax
+     * @param $retryDelayMS
      * @return mixed
      * @throws TopicNotExistException
      * @throws NonCatchableException
      */
-    public function pubRetrying($topic, callable $processor, $retryMax = 3)
+    public function pubRetrying(callable $processor, $identify = 'nsq-publish', $retryMax = 3, $retryDelayMS = 10)
     {
         try
         {
@@ -55,8 +56,14 @@ class HA
                 // retry it
                 if ($retryMax > 0)
                 {
+                    // logging
+                    InstanceMgr::getLoggerInstance()->warn('[HA-Guard] Publish retrying('.$retryMax.') : ['.$identify.'] ~ '.$e->getMessage());
+                    // event trigger
                     $this->triggerEvent(self::EVENT_RETRYING, $e);
-                    return $this->pubRetrying($topic, $processor, $retryMax - 1);
+                    // make delay
+                    $retryDelayMS && usleep($retryDelayMS * 1000);
+                    // retrying
+                    return $this->pubRetrying($processor, $identify, $retryMax - 1, $retryDelayMS);
                 }
             }
             $result = ['success' => 0, 'errors' => [get_class($e).' : '.$e->getMessage()]];
@@ -67,13 +74,15 @@ class HA
 
     /**
      * @param callable $processor
+     * @param string $identify
      * @param int $keepSeconds
      * @param int $retryMax
      * @param int $retryDelay
-     * @param string $identify
      * @return mixed
+     * @throws TopicNotExistException
+     * @throws NonCatchableException
      */
-    public function subRetrying(callable $processor, $keepSeconds = 1800, $retryMax = 3, $retryDelay = 5, $identify = 'nsq-subscribe')
+    public function subRetrying(callable $processor, $identify = 'nsq-subscribe', $keepSeconds = 1800, $retryMax = 3, $retryDelay = 5)
     {
         $beginAtTimestamp = time();
 
@@ -83,33 +92,41 @@ class HA
         }
         catch (SysException $e)
         {
-            // make retry
-            if ($retryMax > 0)
+            if ($e instanceof TopicNotExistException || $e instanceof NonCatchableException)
             {
-                // logging
-                InstanceMgr::getLoggerInstance()->warn('[IRON] Subscribe retrying('.$retryMax.') : ['.$identify.'] ~ '.$e->getMessage());
-                // move keep seconds
-                $surplusSeconds = $keepSeconds - (time() - $beginAtTimestamp);
-                // least keep 10s for next sub
-                if ($surplusSeconds >= 10)
-                {
-                    // event trigger
-                    $this->triggerEvent(self::EVENT_RETRYING, $e);
-                    // make delay
-                    $retryDelay && sleep($retryDelay);
-                    // retrying
-                    return $this->subRetrying($processor, $surplusSeconds, $retryMax - 1, $retryDelay, $identify);
-                }
-                else
-                {
-                    // timeout ... abandoning
-                    return $e->getMessage();
-                }
+                // throw it
+                throw $e;
             }
             else
             {
-                // last retry ... abandoning
-                return $e->getMessage();
+                // make retry
+                if ($retryMax > 0)
+                {
+                    // logging
+                    InstanceMgr::getLoggerInstance()->warn('[HA-Guard] Subscribe retrying('.$retryMax.') : ['.$identify.'] ~ '.$e->getMessage());
+                    // move keep seconds
+                    $surplusSeconds = $keepSeconds - (time() - $beginAtTimestamp);
+                    // least keep 10s for next sub
+                    if ($surplusSeconds >= 10)
+                    {
+                        // event trigger
+                        $this->triggerEvent(self::EVENT_RETRYING, $e);
+                        // make delay
+                        $retryDelay && sleep($retryDelay);
+                        // retrying
+                        return $this->subRetrying($processor, $identify, $surplusSeconds, $retryMax - 1, $retryDelay);
+                    }
+                    else
+                    {
+                        // timeout ... abandoning
+                        return $e->getMessage();
+                    }
+                }
+                else
+                {
+                    // last retry ... abandoning
+                    return $e->getMessage();
+                }
             }
         }
     }
