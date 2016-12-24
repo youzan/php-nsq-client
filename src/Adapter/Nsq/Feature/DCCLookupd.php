@@ -8,21 +8,36 @@
 
 namespace Kdt\Iron\Queue\Adapter\Nsq\Feature;
 
+use Kdt\Iron\Config\Live\DCC;
+use Kdt\Iron\Queue\Adapter\Nsq\Config;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
 class DCCLookupd
 {
     use SingleInstance;
 
-    public function parsing($clusterName, $bootParsed)
+    /**
+     * @param $clusterName
+     * @param $bootParsed
+     * @param $topicNamed
+     * @param $usingScene
+     * @return array
+     */
+    public function parsing($clusterName, $bootParsed, $topicNamed, $usingScene)
     {
+        $foundNodes = [];
+
         if (isset($bootParsed['scheme']) && $bootParsed['scheme'] == 'dcc')
         {
+            $topicConfig = Config::getInstance()->getTopicConfig($topicNamed);
+
+            // get AM info
             $parameters = [];
             parse_str($bootParsed['query'], $parameters);
 
             list($app, $module) = explode('~', $parameters['query']);
 
+            // get cluster sign like "sync", "sqs"
             $clusterSIGN = '';
             $cSepPos = strpos($clusterName, '-');
             if (is_numeric($cSepPos))
@@ -30,12 +45,12 @@ class DCCLookupd
                 $clusterSIGN = '_'.substr($clusterName, $cSepPos + 1);
             }
 
+            // DCC related keys
             $defaultKey = '##_default'.$clusterSIGN;
-            $topicKey = $topic;
+            $topicKey = $topicConfig['topic'];
+            $clientRole = $usingScene == 'pub' ? 'producer' : 'consumer';
 
-            $clientRole = $pipe == 'r' ? 'consumer' : 'producer';
-
-            $cloudStrategy = DCC::gets([sprintf($app, $scope), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
+            $cloudStrategy = DCC::gets([sprintf($app, $topicConfig['group']), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
 
             $usedStrategy =
                 isset($cloudStrategy[$topicKey])
@@ -52,7 +67,7 @@ class DCCLookupd
                 {
                     if ($clientRole == 'consumer')
                     {
-                        $extDSNs[] = $this->getLookupdBalanced($usedStrategy['previous']);
+                        $this->append($foundNodes, $usedStrategy['previous']);
                     }
 
                     if ($clientRole == 'producer')
@@ -65,7 +80,7 @@ class DCCLookupd
                 {
                     if ($clientRole == 'consumer')
                     {
-                        $extDSNs[] = $this->getLookupdBalanced($usedStrategy['current']);
+                        $this->append($foundNodes, $usedStrategy['current']);
                     }
 
                     if ($clientRole == 'producer')
@@ -108,49 +123,51 @@ class DCCLookupd
 
                             if ($grayHit)
                             {
-                                $extDSNs[] = $this->getLookupdBalanced($producerTargets['current']);
+                                $this->append($foundNodes, $producerTargets['current']);
                             }
                             else
                             {
-                                $extDSNs[] = $this->getLookupdBalanced($producerTargets['previous']);
+                                $this->append($foundNodes, $producerTargets['previous']);
                             }
                         }
                         else
                         {
-                            $extDSNs[] = $this->getLookupdBalanced($producerTargets['previous']);
+                            $this->append($foundNodes, $producerTargets['previous']);
                         }
                     }
                     else
                     {
                         if (isset($producerTargets['current']))
                         {
-                            $extDSNs[] = $this->getLookupdBalanced($producerTargets['current']);
+                            $this->append($foundNodes, $producerTargets['current']);
                         }
                         else if (isset($producerTargets['previous']))
                         {
-                            $extDSNs[] = $this->getLookupdBalanced($producerTargets['previous']);
+                            $this->append($foundNodes, $producerTargets['previous']);
                         }
                     }
                 }
             }
 
-            if ($extDSNs)
-            {
-                $viaDynamic = true;
-                if (count($extDSNs) == 1)
-                {
-                    $mainDSN = current($extDSNs);
-                    $extDSNs = [];
-                }
-            }
-            else
+            if (empty($foundNodes))
             {
                 // -> fallback
                 if (isset($parameters['fallback']))
                 {
-                    $mainDSN = $parameters['fallback'];
+                    $foundNodes = [$parameters['fallback']];
                 }
             }
         }
+
+        return $foundNodes;
+    }
+
+    /**
+     * @param $base
+     * @param $more
+     */
+    private function append(&$base, $more)
+    {
+        $base = array_merge($base, $more);
     }
 }

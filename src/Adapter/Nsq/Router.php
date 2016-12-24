@@ -110,11 +110,12 @@ class Router
 
     /**
      * @param $topic
+     * @param $scene
      * @return array
      */
-    public function fetchGlobalLookups($topic)
+    public function fetchGlobalLookups($topic, $scene = 'mix')
     {
-        $cKey = 'global-lookups:'.$topic;
+        $cKey = 'global-lookups:'.$topic.':'.$scene;
 
         if (isset($this->l2Cache[$cKey]))
         {
@@ -123,7 +124,7 @@ class Router
         else
         {
             $config = $this->config->getTopicConfig($topic);
-            $this->l2Cache[$cKey] = $lookups = DSN::getInstance()->translate($config['lookups']);
+            $this->l2Cache[$cKey] = $lookups = DSN::getInstance()->translate($config['lookups'], $config['name'], $scene);
         }
 
         return $lookups;

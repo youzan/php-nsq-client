@@ -30,6 +30,32 @@ class DCC
     }
 
     /**
+     * @param array $am
+     * @param array $keys
+     * @return array
+     */
+    public static function gets(array $am, array $keys = [])
+    {
+        list($app, $module) = $am;
+
+        $kvs = self::loadMocks($app, $module);
+
+        $result = [];
+        foreach ($keys as $key)
+        {
+            if (isset($kvs[$key]))
+            {
+                $result[$key] = json_encode($kvs[$key]);
+            }
+            else
+            {
+                $result[$key] = null;
+            }
+        }
+        return $result;
+    }
+
+    /**
      * @param $app
      * @param $module
      * @return mixed

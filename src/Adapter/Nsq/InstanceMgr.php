@@ -93,7 +93,9 @@ class InstanceMgr
     }
 
     /**
-     * @param null $topic
+     * SUB instance must listen ONE topic in ONE process
+     * ELSE will make some error (e.g. lookups and etc.)
+     * @param $topic
      * @return nsqphp
      * @throws UnknownSubInstanceException
      */
@@ -124,15 +126,16 @@ class InstanceMgr
 
     /**
      * @param $topic
+     * @param $scene
      * @return LookupInterface
      */
-    public static function getLookupInstance($topic)
+    public static function getLookupInstance($topic, $scene = 'mix')
     {
         self::initHASupport();
 
         $topicConfig = self::getConfig()->getTopicConfig($topic);
 
-        return self::touchLookupdInstance(self::getStreamingPipe($topic), $topicConfig);
+        return self::touchLookupdInstance(self::getStreamingPipe($topic), $topicConfig, $scene);
     }
 
     /**
@@ -214,19 +217,20 @@ class InstanceMgr
     /**
      * @param $pipe
      * @param $config
+     * @param $scene
      * @return LookupInterface
      * @throws ServiceInitializationException
      */
-    private static function touchLookupdInstance($pipe, $config)
+    private static function touchLookupdInstance($pipe, $config, $scene = 'mix')
     {
         $scope = $config['scope'];
 
         // make lookupd instance isolated because DCC will take dynamic results
         $isolated = $config['name'];
 
-        if (isset(self::$lookupInstances[$pipe][$scope][$isolated]))
+        if (isset(self::$lookupInstances[$pipe][$scope][$isolated][$scene]))
         {
-            $splitter = self::$lookupInstances[$pipe][$scope][$isolated];
+            $splitter = self::$lookupInstances[$pipe][$scope][$isolated][$scene];
         }
         else
         {
@@ -237,10 +241,10 @@ class InstanceMgr
                 &&
                 $splitter->registerProxy(self::touchProxyInstance($pipe))
                 &&
-                $splitter->registerLookupd(Router::getInstance()->fetchGlobalLookups($config['name']))
+                $splitter->registerLookupd(Router::getInstance()->fetchGlobalLookups($config['name'], $scene))
             )
             {
-                self::$lookupInstances[$pipe][$scope][$isolated] = $splitter;
+                self::$lookupInstances[$pipe][$scope][$isolated][$scene] = $splitter;
             }
             else
             {

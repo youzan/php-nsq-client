@@ -1,24 +1,20 @@
 <?php
 /**
- * DSN test
+ * Router test for dsn/lookups
  * User: moyo
- * Date: 23/12/2016
- * Time: 3:33 PM
+ * Date: 25/12/2016
+ * Time: 2:07 AM
  */
 
 namespace Kdt\Iron\Queue\Tests\Adapter\Nsq;
 
-use Kdt\Iron\Queue\Adapter\Nsq\Config;
-use Kdt\Iron\Queue\Adapter\Nsq\DSN;
+use Kdt\Iron\Queue\Adapter\Nsq\Router;
 
-class DSNTest extends \PHPUnit_Framework_TestCase
+class RouterDSNTest extends \PHPUnit_Framework_TestCase
 {
     public function testTranslateSyntax()
     {
-        $topic = 'dsn_topic_syntax_old';
-        $config = Config::getInstance()->getTopicConfig($topic);
-
-        $lookups = DSN::getInstance()->translate($config['lookups']);
+        $lookups = Router::getInstance()->fetchGlobalLookups('dsn_topic_syntax_old');
         $expect = [
             'r' => ['lookupd-dsn-syntax-old' => ['http://127.0.0.1:2']],
             'w' => ['lookupd-dsn-syntax-old' => ['http://127.0.0.1:2']],
@@ -29,10 +25,7 @@ class DSNTest extends \PHPUnit_Framework_TestCase
 
     public function testTranslateNormal()
     {
-        $topic = 'dsn_topic_normal';
-        $config = Config::getInstance()->getTopicConfig($topic);
-
-        $lookups = DSN::getInstance()->translate($config['lookups']);
+        $lookups = Router::getInstance()->fetchGlobalLookups('dsn_topic_normal');
         $expect = [
             'r' => ['lookupd-dsn-normal' => ['http://127.0.0.1:2']],
             'w' => ['lookupd-dsn-normal' => ['http://127.0.0.1:2']],
@@ -43,10 +36,7 @@ class DSNTest extends \PHPUnit_Framework_TestCase
 
     public function testTranslateBalanced()
     {
-        $topic = 'dsn_topic_balanced';
-        $config = Config::getInstance()->getTopicConfig($topic);
-
-        $lookups = DSN::getInstance()->translate($config['lookups']);
+        $lookups = Router::getInstance()->fetchGlobalLookups('dsn_topic_balanced');
         $avaLookups = ['http://127.0.0.1:2', 'http://127.0.0.1:3'];
         $clusterName = 'lookupd-dsn-balanced';
 
@@ -56,21 +46,14 @@ class DSNTest extends \PHPUnit_Framework_TestCase
 
     public function testTranslateDiscovery()
     {
+        $lookups = Router::getInstance()->fetchGlobalLookups('dsn_topic_discovery');
+        $clusterName = 'lookupd-dsn-discovery';
+        $dynLookups = ['http://127.0.0.2:11', 'http://127.0.0.2:22'];
+        $expect = [
+            'r' => [$clusterName => $dynLookups],
+            'w' => [$clusterName => $dynLookups],
+        ];
 
-    }
-
-    public function testDCCSBegin()
-    {
-
-    }
-
-    public function testDCCSMoving()
-    {
-
-    }
-
-    public function testDCCSFinish()
-    {
-
+        $this->assertArraySubset($lookups, $expect, TRUE);
     }
 }

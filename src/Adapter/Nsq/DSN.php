@@ -40,9 +40,11 @@ class DSN
 
     /**
      * @param $lookupList
+     * @param $topicNamed
+     * @param $usingScene
      * @return array
      */
-    public function translate($lookupList)
+    public function translate($lookupList, $topicNamed = null, $usingScene = null)
     {
         $DSNs = [];
 
@@ -51,31 +53,31 @@ class DSN
         {
             if (isset($lookupList[$pipe]))
             {
-                $static = $dynamic = [];
+                $staticDSNs = $dynamicDSNs = [];
 
                 $lookupChannel = $lookupList[$pipe];
                 foreach ($lookupChannel as $clusterName => $providerDSN)
                 {
                     if ($providerDSN == '@self')
                     {
-                        list($provideDSNs, $dynamic) = $this->getLookupdDSN($clusterName);
-                        if ($dynamic)
+                        list($provideDSNs, $viaDynamic) = $this->getLookupdDSN($clusterName, $topicNamed, $usingScene);
+                        if ($viaDynamic)
                         {
-                            $dynamic[$clusterName] = $provideDSNs;
+                            $dynamicDSNs[$clusterName] = $provideDSNs;
                         }
                         else
                         {
-                            $static[$clusterName] = $provideDSNs;
+                            $staticDSNs[$clusterName] = $provideDSNs;
                         }
                     }
                     else
                     {
-                        $static[$clusterName] = [$providerDSN];
+                        $staticDSNs[$clusterName] = [$providerDSN];
                     }
                 }
 
                 // ignore staticDSNs if we got dynamicDSNs from any cluster
-                $DSNs[$pipe] = $dynamic ?: $static;
+                $DSNs[$pipe] = $dynamicDSNs ?: $staticDSNs;
             }
         }
 
@@ -100,9 +102,11 @@ class DSN
 
     /**
      * @param $clusterName
+     * @param $topicNamed
+     * @param $usingScene
      * @return array
      */
-    private function getLookupdDSN($clusterName)
+    private function getLookupdDSN($clusterName, $topicNamed = null, $usingScene = null)
     {
         if (isset($this->cachedDSNs[$clusterName]))
         {
@@ -129,7 +133,7 @@ class DSN
         $bootParsed = parse_url($bootDSN);
         if ($bootParsed['scheme'] == 'dcc')
         {
-            $dynamicResults = DCCLookupd::getInstance()->parsing($clusterName, $bootParsed);
+            $dynamicResults = DCCLookupd::getInstance()->parsing($clusterName, $bootParsed, $topicNamed, $usingScene);
         }
         else
         {
