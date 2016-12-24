@@ -108,9 +108,25 @@ class Router
         return php_sapi_name() == 'cli' ? 'tcp' : 'http';
     }
 
+    /**
+     * @param $topic
+     * @return array
+     */
     public function fetchGlobalLookups($topic)
     {
-        // TODO all lookup nodes should be getting from here
+        $cKey = 'global-lookups:'.$topic;
+
+        if (isset($this->l2Cache[$cKey]))
+        {
+            $lookups = $this->l2Cache[$cKey];
+        }
+        else
+        {
+            $config = $this->config->getTopicConfig($topic);
+            $this->l2Cache[$cKey] = $lookups = DSN::getInstance()->translate($config['lookups']);
+        }
+
+        return $lookups;
     }
 
     /**

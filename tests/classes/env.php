@@ -14,3 +14,4 @@ define('RESOURCE_PATH', realpath(__DIR__ . '/../') . '/resources/');
 
 class_alias('Kdt\Iron\Queue\Tests\classes\Config', 'Config');
 class_alias('Kdt\Iron\Queue\Tests\classes\Log\Log', 'Kdt\Iron\Log\Log');
+class_alias('Kdt\Iron\Queue\Tests\classes\nsqphp\HTTP', 'nsqphp\Connection\HTTP');

@@ -62,7 +62,7 @@ class MsgSharding
                 $limitedSlot = $mapPrefix.(string)($proof % $knownPartitionNum);
                 if (isset($partitionNodes[$limitedSlot]))
                 {
-                    $target->setLimitedNode([$partitionNodes[$limitedSlot]]);
+                    $target->setLimitedNode($partitionNodes[$limitedSlot]);
                 }
                 else
                 {

@@ -1,6 +1,6 @@
 <?php
 /**
- * KDT logger
+ * KDT logger mock
  * User: moyo
  * Date: 22/12/2016
  * Time: 6:08 PM

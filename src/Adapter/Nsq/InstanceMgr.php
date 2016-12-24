@@ -151,9 +151,9 @@ class InstanceMgr
      */
     public static function cleanWhenSrvRetrying(SysException $e)
     {
-        unset(self::$lookupInstances);
-        unset(self::$nsqInstances);
-        unset(self::$pubRouteConfirms);
+        self::$lookupInstances = [];
+        self::$nsqInstances = [];
+        self::$pubRouteConfirms = [];
     }
 
     /**
@@ -222,9 +222,12 @@ class InstanceMgr
     {
         $scope = $config['scope'];
 
-        if (isset(self::$lookupInstances[$pipe][$scope]))
+        // make lookupd instance isolated because DCC will take dynamic results
+        $isolated = $config['name'];
+
+        if (isset(self::$lookupInstances[$pipe][$scope][$isolated]))
         {
-            $splitter = self::$lookupInstances[$pipe][$scope];
+            $splitter = self::$lookupInstances[$pipe][$scope][$isolated];
         }
         else
         {
@@ -235,10 +238,10 @@ class InstanceMgr
                 &&
                 $splitter->registerProxy(self::touchProxyInstance($pipe))
                 &&
-                $splitter->registerLookupd(DSN::getInstance()->translate($config['lookups']))
+                $splitter->registerLookupd(Router::getInstance()->fetchGlobalLookups($config['name']))
             )
             {
-                self::$lookupInstances[$pipe][$scope] = $splitter;
+                self::$lookupInstances[$pipe][$scope][$isolated] = $splitter;
             }
             else
             {

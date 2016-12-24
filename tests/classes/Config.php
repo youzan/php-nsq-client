@@ -16,12 +16,24 @@ class Config
     private static $configs = [];
 
     /**
+     * @var array
+     */
+    private static $preDefines = [
+        'run_mode' => 'unittest'
+    ];
+
+    /**
      * @param $name
      *
      * @return mixed|null
      */
     public static function get($name)
     {
+        if (isset(self::$preDefines[$name]))
+        {
+            return self::$preDefines[$name];
+        }
+
         $config = self::loading($name);
 
         return isset($config[$name]) ? $config[$name] : null;
