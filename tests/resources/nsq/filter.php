@@ -11,6 +11,7 @@ return [
         'lookupd-default'
     ],
     'topic' => [
-        'filter_topic_normal' => 'filter_topic_normal'
+        'filter_topic_normal' => 'filter_topic_normal',
+        'filter_topic_traced' => 'filter_topic_traced',
     ]
 ];

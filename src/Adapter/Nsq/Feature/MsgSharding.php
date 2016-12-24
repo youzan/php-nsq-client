@@ -8,13 +8,13 @@
 
 namespace Kdt\Iron\Queue\Adapter\Nsq\Feature;
 
+use Kdt\Iron\Queue\Adapter\Nsq\Config;
 use Kdt\Iron\Queue\Adapter\Nsq\Router;
+use Kdt\Iron\Queue\Exception\ShardingStrategyException;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
 use Kdt\Iron\Queue\Message as QMessage;
 use nsqphp\Message\Message as NSQMessage;
-
-use nsqphp\Exception\ShardingStrategyException;
 
 class MsgSharding
 {
@@ -24,11 +24,30 @@ class MsgSharding
      * @param $topic
      * @param QMessage $origin
      * @param NSQMessage $target
+     * @param bool $inBag
+     * @throws ShardingStrategyException
      */
-    public function process($topic, QMessage $origin, NSQMessage $target)
+    public function process($topic, QMessage $origin, NSQMessage $target, $inBag)
     {
+        $config = Config::getInstance()->getTopicConfig($topic);
         $proof = $origin->getShardingProof();
-        if ($proof)
+
+        if ($config['sharding'] && is_null($proof))
+        {
+            throw new ShardingStrategyException('Missing proof for sharding topic');
+        }
+
+        if (is_numeric($proof) && !$config['sharding'])
+        {
+            throw new ShardingStrategyException('This topic can not be sharding');
+        }
+
+        if ($config['sharding'] && $inBag)
+        {
+            throw new ShardingStrategyException('Messages must publish one by one');
+        }
+
+        if (is_numeric($proof))
         {
             $pubNodes = Router::getInstance()->fetchPublishNodes($topic);
 

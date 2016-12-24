@@ -82,6 +82,7 @@ class InstanceMgr
         if (false === isset(self::$pubRouteConfirms[$topic]))
         {
             $nsqd->publishTo(
+                self::getConfig()->parseTopicName($topic),
                 Router::getInstance()->fetchPublishNodes($topic),
                 Router::getInstance()->fetchPublishViaType()
             );
@@ -197,8 +198,6 @@ class InstanceMgr
 
             $nsqd->setNsLookup(self::touchLookupdInstance($pipe, $config));
             $nsqd->setProxy(self::touchProxyInstance($pipe));
-
-            $nsqd->setPubNodesPriority(self::getConfig()->getGlobalSetting('nsq.priority') ?: []);
 
             $warningSet = self::getConfig()->getGlobalSetting('nsq.monitor.msg-bag');
 

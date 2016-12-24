@@ -24,7 +24,7 @@ class DSNTest extends \PHPUnit_Framework_TestCase
             'w' => ['lookupd-dsn-syntax-old' => ['http://127.0.0.1:2']],
         ];
 
-        $this->assertArraySubset($expect, $lookups);
+        $this->assertArraySubset($lookups, $expect, TRUE);
     }
 
     public function testTranslateNormal()
@@ -38,7 +38,7 @@ class DSNTest extends \PHPUnit_Framework_TestCase
             'w' => ['lookupd-dsn-normal' => ['http://127.0.0.1:2']],
         ];
 
-        $this->assertArraySubset($expect, $lookups);
+        $this->assertArraySubset($lookups, $expect, TRUE);
     }
 
     public function testTranslateBalanced()

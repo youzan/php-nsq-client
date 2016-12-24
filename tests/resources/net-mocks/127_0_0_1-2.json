@@ -22,7 +22,7 @@
       ]
     }
   },
-  "/lookup?topic=sharding_topic_1&metainfo=true&access=w": {
+  "/lookup?topic=sharding_with_enabled&metainfo=true&access=w": {
     "request": {},
     "response": {
       "channels": [

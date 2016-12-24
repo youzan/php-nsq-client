@@ -63,12 +63,13 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             'scope' => 'config',
             'name' => 'config_topic_name',
             'topic' => 'config_topic_name_full',
+            'sharding' => false,
             'lookups' => [
                 'r' => ['lookupd-default' => '@self'],
                 'w' => ['lookupd-default' => '@self'],
             ]
         ];
-        $this->assertArraySubset($configExpect, $topicConfig);
+        $this->assertArraySubset($topicConfig, $configExpect, TRUE);
     }
 
     public function testGetTopicConfigStrategy()
@@ -97,12 +98,33 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
                         $expectLookups[$pipe][$cluster] = '@self';
                     });
                 }
+                else
+                {
+                    $expectLookups[$pipe] = [];
+                }
             }
 
             $config = Config::getInstance()->getTopicConfig($topic);
             $this->assertEquals($topic == 'strategy_cluster_default0' ? 'strategy' : $topic, $config['scope']);
-            $this->assertArraySubset($expectLookups, $config['lookups']);
+            $this->assertArraySubset($config['lookups'], $expectLookups, TRUE, 'topic='.$topic);
         }
+    }
+
+    public function testGetTopicConfigSharding()
+    {
+        $topicConfig = Config::getInstance()->getTopicConfig('sharding.with_enabled');
+        $configExpect = [
+            'group' => 'sharding',
+            'scope' => 'sharding',
+            'name' => 'sharding_with_enabled',
+            'topic' => 'sharding_with_enabled',
+            'sharding' => true,
+            'lookups' => [
+                'r' => ['lookupd-default' => '@self'],
+                'w' => ['lookupd-default' => '@self'],
+            ]
+        ];
+        $this->assertArraySubset($topicConfig, $configExpect, TRUE);
     }
 
     public function testGetGlobalSetting()

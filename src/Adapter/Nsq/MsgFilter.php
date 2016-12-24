@@ -46,6 +46,32 @@ class MsgFilter
      */
     public function getMsgObject($topic, $bizMsg)
     {
+        return $this->getTargetMsg($topic, $bizMsg, false);
+    }
+
+    /**
+     * @param $topic
+     * @param $bizMsgList
+     * @return NSQMessage[]
+     */
+    public function getMsgObjectBag($topic, $bizMsgList)
+    {
+        $bag = [];
+        foreach ($bizMsgList as $message)
+        {
+            $bag[] = $this->getTargetMsg($topic, $message, true);
+        }
+        return $bag;
+    }
+
+    /**
+     * @param $topic
+     * @param $bizMsg
+     * @param $inBag
+     * @return NSQMessage
+     */
+    private function getTargetMsg($topic, $bizMsg, $inBag)
+    {
         if (is_object($bizMsg) && $bizMsg instanceof QMessage)
         {
             $origin = $bizMsg;
@@ -60,9 +86,9 @@ class MsgFilter
         // flows
 
         // s1 - msg tracing
-        $this->msgTracing->process($topic, $origin, $target);
+        $this->msgTracing->process($topic, $origin, $target, $inBag);
         // s2 - msg sharding
-        $this->msgSharding->process($topic, $origin, $target);
+        $this->msgSharding->process($topic, $origin, $target, $inBag);
 
         // finish
 

@@ -71,15 +71,9 @@ class Client implements AdapterInterface
     {
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $messages) {
 
-            $bag = [];
-            foreach ($messages as $message)
-            {
-                $bag[] = $this->msgFilter->getMsgObject($topic, $message);
-            }
-
             return InstanceMgr::getPubInstance($topic)->publish(
                 $this->config->parseTopicName($topic),
-                $bag
+                $this->msgFilter->getMsgObjectBag($topic, $messages)
             );
 
         }, $topic);

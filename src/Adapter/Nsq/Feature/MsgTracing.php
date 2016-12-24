@@ -48,9 +48,12 @@ class MsgTracing
      * @param $topic
      * @param QMessage $origin
      * @param NSQMessage $target
+     * @param bool $inBag
      */
-    public function process($topic, QMessage $origin, NSQMessage $target)
+    public function process($topic, QMessage $origin, NSQMessage $target, $inBag)
     {
+        // whatever $inBag
+
         $nsqTraceID = 0;
 
         $bizTraceID = $origin->getTraceID();

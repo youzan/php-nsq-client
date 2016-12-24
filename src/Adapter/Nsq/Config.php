@@ -68,7 +68,7 @@ class Config
         }
         else
         {
-            throw new InvalidConfigException('Missing required topic config', 9998);
+            throw new InvalidConfigException('Missing required topic config ~ '.$topicParsed, 9998);
         }
     }
 
@@ -169,14 +169,21 @@ class Config
                 }
             }
 
+            // sharding enables
+            $shardingEnables = isset($config['sharding_enabled']) ? $config['sharding_enabled'] : [];
+
+            // rw strategy
             $rwStrategy = isset($config['rw_strategy']) ? $config['rw_strategy'] : [];
 
+            // mixing config
             $mapping = [];
 
             foreach ($config['topic'] as $topicBiz => $topicNsq)
             {
                 $scopeName = $groupName;
                 $lookupdCopy = $lookupdPool;
+                $shardingMsg = false;
+
                 if (isset($rwStrategy[$topicBiz]))
                 {
                     $scopeName = $topicBiz;
@@ -220,11 +227,17 @@ class Config
                     }
                 }
 
+                if (isset($shardingEnables[$topicBiz]))
+                {
+                    $shardingMsg = $shardingEnables[$topicBiz] ? true : false;
+                }
+
                 $mapping[$topicBiz] = [
                     'group' => $groupName,
                     'scope' => $scopeName,
                     'name' => $topicBiz,
                     'topic' => $topicNsq,
+                    'sharding' => $shardingMsg,
                     'lookups' => $lookupdCopy
                 ];
             }

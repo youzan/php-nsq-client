@@ -24,9 +24,29 @@ class MsgFilterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $nsqMsg->getLimitedNode());
     }
 
-    public function testShardingProcess()
+    public function testTraceProcess()
     {
-        $topic = 'sharding_topic_1';
+        $traceID = rand(0, 999);
+
+        $trMap = [
+            'filter_topic_normal' => null,
+            'filter_topic_traced' => $traceID,
+        ];
+
+        foreach ($trMap as $topic => $expectResult)
+        {
+            $bizMsg = new QMessage('msg-data');
+            $bizMsg->setTraceID($traceID);
+
+            $nsqMsg = MsgFilter::getInstance()->getMsgObject($topic, $bizMsg);
+
+            $this->assertEquals($expectResult, $nsqMsg->getTraceId());
+        }
+    }
+
+    public function testShardingEnabled()
+    {
+        $topic = 'sharding_with_enabled';
 
         $shardingProof = 3;
         $mockingPartitionNum = 2;

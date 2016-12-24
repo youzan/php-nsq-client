@@ -13,6 +13,7 @@ use Kdt\Iron\Queue\Exception\InvalidConfigException;
 use Kdt\Iron\Queue\Exception\InvalidParameterException;
 use Kdt\Iron\Queue\Exception\MissingRoutesException;
 use Kdt\Iron\Queue\Exception\ServiceInitializationException;
+use Kdt\Iron\Queue\Exception\ShardingStrategyException;
 use Kdt\Iron\Queue\Exception\UnknownSubInstanceException;
 use nsqphp\Exception\FailedOnAllNodesException;
 use nsqphp\Exception\FailedOnNotLeaderException;
@@ -32,7 +33,8 @@ class HATest extends \PHPUnit_Framework_TestCase
         InvalidParameterException::class,
         MissingRoutesException::class,
         ServiceInitializationException::class,
-        UnknownSubInstanceException::class
+        ShardingStrategyException::class,
+        UnknownSubInstanceException::class,
     ];
 
     /**
@@ -41,7 +43,7 @@ class HATest extends \PHPUnit_Framework_TestCase
     private $pubRetryExceptions = [
         LookupException::class,
         FailedOnNotLeaderException::class,
-        FailedOnAllNodesException::class
+        FailedOnAllNodesException::class,
     ];
 
     /**
@@ -49,7 +51,7 @@ class HATest extends \PHPUnit_Framework_TestCase
      */
     private $subRetryExceptions = [
         LookupException::class,
-        RuntimeException::class
+        RuntimeException::class,
     ];
 
     /**
@@ -86,7 +88,7 @@ class HATest extends \PHPUnit_Framework_TestCase
         ];
 
         $this->assertEquals(1, $executed);
-        $this->assertArraySubset($result, $expect);
+        $this->assertArraySubset($result, $expect, TRUE);
     }
 
     public function testPubRetryingRetried()
@@ -107,7 +109,7 @@ class HATest extends \PHPUnit_Framework_TestCase
 
         // first time + retry 3 times
         $this->assertEquals(4, $executed);
-        $this->assertArraySubset($result, $expect);
+        $this->assertArraySubset($result, $expect, TRUE);
     }
 
     public function testSubRetryingWithOK()
