@@ -1,0 +1,36 @@
+{
+  "/lookup?topic=router_topic_nsq&metainfo=true&access=w": {
+    "request": {},
+    "response": {
+      "channels": [
+        "benchmark"
+      ],
+      "meta": {
+        "partition_num": 2,
+        "replica": 2
+      },
+      "partitions": {
+        "0": {
+          "id": "127.0.0.1:31",
+          "remote_address": "127.0.0.1:31",
+          "hostname": "nsq-1",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 31,
+          "http_port": 31,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:31:31:1"
+        },
+        "1": {
+          "id": "127.0.0.1:32",
+          "remote_address": "127.0.0.1:32",
+          "hostname": "nsq-2",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 32,
+          "http_port": 32,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:32:32:2"
+        }
+      }
+    }
+  }
+}

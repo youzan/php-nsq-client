@@ -85,7 +85,7 @@ class Router
             $nodes = $this->cache->host(
                 sprintf($this->cLookupResultsKey, $topic),
                 function() use ($topic) {
-                    return InstanceMgr::getLookupInstance($topic)->lookupHosts($topic, 'pub');
+                    return InstanceMgr::getLookupInstance($topic)->lookupHosts($this->config->parseTopicName($topic), 'pub');
                 },
                 $this->config->getGlobalSetting('nsq.mem-cache.lookupResultsTTL', $this->cLookupResultsTTL)
             );

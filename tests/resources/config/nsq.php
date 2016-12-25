@@ -10,6 +10,7 @@ return [
     'nsq.testing.config.get' => 'hi',
 
     'nsq.server.lookupd.lookupd-default' => ['http://127.0.0.1:2'],
+    'nsq.server.lookupd.lookupd-router' => ['http://127.0.0.1:3'],
     'nsq.server.lookupd.lookupd-dsn-syntax-old' => ['http:127.0.0.1:2'],
     'nsq.server.lookupd.lookupd-dsn-normal' => ['http://127.0.0.1:2'],
     'nsq.server.lookupd.lookupd-dsn-balanced' => ['http://127.0.0.1:2', 'http://127.0.0.1:3'],
