@@ -8,10 +8,15 @@
 
 return [
     'nsq.testing.config.get' => 'hi',
+
     'nsq.server.lookupd.lookupd-default' => ['http://127.0.0.1:2'],
     'nsq.server.lookupd.lookupd-dsn-syntax-old' => ['http:127.0.0.1:2'],
     'nsq.server.lookupd.lookupd-dsn-normal' => ['http://127.0.0.1:2'],
     'nsq.server.lookupd.lookupd-dsn-balanced' => ['http://127.0.0.1:2', 'http://127.0.0.1:3'],
     'nsq.server.lookupd.lookupd-dsn-discovery' => ['http://127.0.0.2:1'],
+
+    'nsq.server.lookupd.global-dcc-default' => ['dcc://local/parameters?query=%s.nsq.lookupd.addr~%s&fallback=http://127.0.0.3:12345'],
     'nsq.server.lookupd.global-dcc-before' => ['dcc://local/parameters?query=%s.nsq.lookupd.addr~%s&fallback=http://127.0.0.3:12345'],
+    'nsq.server.lookupd.global-dcc-moving' => ['dcc://local/parameters?query=%s.nsq.lookupd.addr~%s&fallback=http://127.0.0.3:12345'],
+    'nsq.server.lookupd.global-dcc-finish' => ['dcc://local/parameters?query=%s.nsq.lookupd.addr~%s&fallback=http://127.0.0.3:12345'],
 ];

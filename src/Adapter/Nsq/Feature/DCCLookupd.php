@@ -96,39 +96,33 @@ class DCCLookupd
                         $grayHosts = $usedStrategy['gradation'];
                         $localHost = gethostname();
 
+                        $grayRule = null;
+                        $grayHit = false;
+
                         if (isset($grayHosts[$localHost]))
                         {
                             $grayRule = $grayHosts[$localHost];
                         }
                         else if (isset($grayHosts['*']))
                         {
-                            $grayRule = $grayHosts[$localHost];
-                        }
-                        else
-                        {
-                            $grayRule = null;
+                            $grayRule = $grayHosts['*'];
                         }
 
                         if ($grayRule)
                         {
-                            $grayHit = false;
                             if (isset($grayRule['percent']))
                             {
                                 $grayPercentK = round($grayRule['percent'], 3) * 1000;
-                                if ($grayPercentK <= rand(0, 100000))
+                                if ($grayPercentK >= rand(0, 100000))
                                 {
                                     $grayHit = true;
                                 }
                             }
+                        }
 
-                            if ($grayHit)
-                            {
-                                $this->append($foundNodes, $producerTargets['current']);
-                            }
-                            else
-                            {
-                                $this->append($foundNodes, $producerTargets['previous']);
-                            }
+                        if ($grayHit)
+                        {
+                            $this->append($foundNodes, $producerTargets['current']);
                         }
                         else
                         {

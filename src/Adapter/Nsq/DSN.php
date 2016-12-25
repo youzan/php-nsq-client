@@ -108,9 +108,14 @@ class DSN
      */
     private function getLookupdDSN($clusterName, $topicNamed = null, $usingScene = null)
     {
-        if (isset($this->cachedDSNs[$clusterName]))
+        $cKey = $clusterName;
+
+        is_null($topicNamed) || $cKey .= ':'.$topicNamed;
+        is_null($usingScene) || $cKey .= ':'.$usingScene;
+
+        if (isset($this->cachedDSNs[$cKey]))
         {
-            return $this->cachedDSNs[$clusterName];
+            return $this->cachedDSNs[$cKey];
         }
 
         $config = $this->balancedPicking($this->config->getGlobalSetting('nsq.server.lookupd.'.$clusterName));
@@ -141,7 +146,7 @@ class DSN
             $staticResults = $discoveredResults ?: [$bootDSN];
         }
 
-        $this->cachedDSNs[$clusterName] = $finalResults = [$dynamicResults ?: $staticResults, $dynamicResults ? true : false];
+        $this->cachedDSNs[$cKey] = $finalResults = [$dynamicResults ?: $staticResults, $dynamicResults ? true : false];
 
         return $finalResults;
     }

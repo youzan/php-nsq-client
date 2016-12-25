@@ -13,8 +13,12 @@ return [
         'dsn_topic_normal' => ['lookupd-dsn-normal' => 'rw'],
         'dsn_topic_balanced' => ['lookupd-dsn-balanced' => 'rw'],
         'dsn_topic_discovery' => ['lookupd-dsn-discovery' => 'rw'],
+
+        'dsn_topic_dcc_default' => ['global-dcc-default' => 'rw'],
         'dsn_topic_dcc_before' => ['global-dcc-before' => 'rw'],
-        'dsn_topic_dcc_moving' => ['global-dcc-moving' => 'rw'],
+        'dsn_topic_dcc_moving_gray_miss' => ['global-dcc-moving' => 'rw'],
+        'dsn_topic_dcc_moving_gray_hit' => ['global-dcc-moving' => 'rw'],
+        'dsn_topic_dcc_moving_all' => ['global-dcc-moving' => 'rw'],
         'dsn_topic_dcc_finish' => ['global-dcc-finish' => 'rw'],
     ],
     'topic' => [
@@ -22,8 +26,12 @@ return [
         'dsn_topic_normal' => 'dsn_topic_normal',
         'dsn_topic_balanced' => 'dsn_topic_balanced',
         'dsn_topic_discovery' => 'dsn_topic_discovery',
+
+        'dsn_topic_dcc_default' => 'dsn_topic_dcc_default',
         'dsn_topic_dcc_before' => 'dsn_topic_dcc_before',
-        'dsn_topic_dcc_moving' => 'dsn_topic_dcc_moving',
+        'dsn_topic_dcc_moving_gray_miss' => 'dsn_topic_dcc_moving_gray_miss',
+        'dsn_topic_dcc_moving_gray_hit' => 'dsn_topic_dcc_moving_gray_hit',
+        'dsn_topic_dcc_moving_all' => 'dsn_topic_dcc_moving_all',
         'dsn_topic_dcc_finish' => 'dsn_topic_dcc_finish',
     ]
 ];
