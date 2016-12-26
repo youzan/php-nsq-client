@@ -18,7 +18,7 @@ return [
         'dsn_topic_dcc_before' => ['global-dcc-before' => 'rw'],
         'dsn_topic_dcc_moving_gray_miss' => ['global-dcc-moving' => 'rw'],
         'dsn_topic_dcc_moving_gray_hit' => ['global-dcc-moving' => 'rw'],
-        'dsn_topic_dcc_moving_all' => ['global-dcc-moving' => 'rw'],
+        'dsn_topic_dcc_moving_non' => ['global-dcc-moving' => 'rw'],
         'dsn_topic_dcc_finish' => ['global-dcc-finish' => 'rw'],
     ],
     'topic' => [
@@ -31,7 +31,7 @@ return [
         'dsn_topic_dcc_before' => 'dsn_topic_dcc_before',
         'dsn_topic_dcc_moving_gray_miss' => 'dsn_topic_dcc_moving_gray_miss',
         'dsn_topic_dcc_moving_gray_hit' => 'dsn_topic_dcc_moving_gray_hit',
-        'dsn_topic_dcc_moving_all' => 'dsn_topic_dcc_moving_all',
+        'dsn_topic_dcc_moving_non' => 'dsn_topic_dcc_moving_non',
         'dsn_topic_dcc_finish' => 'dsn_topic_dcc_finish',
     ]
 ];

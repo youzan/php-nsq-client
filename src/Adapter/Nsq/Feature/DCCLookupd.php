@@ -131,13 +131,13 @@ class DCCLookupd
                     }
                     else
                     {
-                        if (isset($producerTargets['current']))
-                        {
-                            $this->append($foundNodes, $producerTargets['current']);
-                        }
-                        else if (isset($producerTargets['previous']))
+                        if (isset($producerTargets['previous']))
                         {
                             $this->append($foundNodes, $producerTargets['previous']);
+                        }
+                        else if (isset($producerTargets['current']))
+                        {
+                            $this->append($foundNodes, $producerTargets['current']);
                         }
                     }
                 }

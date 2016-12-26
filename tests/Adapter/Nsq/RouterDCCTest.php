@@ -16,8 +16,8 @@ class RouterDCCTest extends \PHPUnit_Framework_TestCase
     {
         $testData = [
             'dsn_topic_dcc_default' => [
-                'sub' => ['global-dcc-default', ['http://127.0.0.3:12345']],
-                'pub' => ['global-dcc-default', ['http://127.0.0.3:12345']],
+                'sub' => ['global-dcc-default', ['http://127.0.0.3:123']],
+                'pub' => ['global-dcc-default', ['http://127.0.0.3:123']],
             ],
             'dsn_topic_dcc_before' => [
                 'sub' => ['global-dcc-before', ['http://127.0.0.3:1']],
@@ -31,9 +31,9 @@ class RouterDCCTest extends \PHPUnit_Framework_TestCase
                 'sub' => ['global-dcc-moving', ['http://127.0.0.3:1', 'http://127.0.0.3:2']],
                 'pub' => ['global-dcc-moving', ['http://127.0.0.3:2']],
             ],
-            'dsn_topic_dcc_moving_all' => [
+            'dsn_topic_dcc_moving_non' => [
                 'sub' => ['global-dcc-moving', ['http://127.0.0.3:1', 'http://127.0.0.3:2']],
-                'pub' => ['global-dcc-moving', ['http://127.0.0.3:2']],
+                'pub' => ['global-dcc-moving', ['http://127.0.0.3:1']],
             ],
             'dsn_topic_dcc_finish' => [
                 'sub' => ['global-dcc-finish', ['http://127.0.0.3:2']],

@@ -1,7 +1,7 @@
 {
   "##_default_dcc-default": {
     "current": [
-      "http://127.0.0.3:12345"
+      "http://127.0.0.3:123"
     ]
   },
   "##_default_dcc-before": {
@@ -50,7 +50,7 @@
       }
     }
   },
-  "dsn_topic_dcc_moving_all": {
+  "dsn_topic_dcc_moving_non": {
     "previous": [
       "http://127.0.0.3:1"
     ],
