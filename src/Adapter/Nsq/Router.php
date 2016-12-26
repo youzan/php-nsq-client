@@ -105,6 +105,11 @@ class Router
      */
     public function fetchPublishViaType()
     {
+        if (defined('K_QUEUE_FORCE_PUB_VIA_TYPE'))
+        {
+            return K_QUEUE_FORCE_PUB_VIA_TYPE;
+        }
+
         return php_sapi_name() == 'cli' ? 'tcp' : 'http';
     }
 

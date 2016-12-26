@@ -51,9 +51,9 @@ class Cache
      */
     public function clear()
     {
-        foreach ($this->history as $idx => $key)
+        foreach ($this->history as $idx => $type)
         {
-            if ($this->mcInstance->del($key))
+            if ($type == 'host' && $this->mcInstance->del($idx))
             {
                 unset($this->history[$idx]);
             }

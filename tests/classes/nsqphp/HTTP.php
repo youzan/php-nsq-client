@@ -16,6 +16,11 @@ class HTTP
     private static $data = [];
 
     /**
+     * @var int
+     */
+    private static $reqCount = 0;
+
+    /**
      * @param $url
      * @param array $options
      * @return array
@@ -37,6 +42,14 @@ class HTTP
     }
 
     /**
+     * @return int
+     */
+    public static function reqCount()
+    {
+        return self::$reqCount;
+    }
+
+    /**
      * @param $targetURL
      * @param array $expectSubmit
      * @return mixed
@@ -44,6 +57,8 @@ class HTTP
      */
     private static function requestLocal($targetURL, $expectSubmit = [])
     {
+        self::$reqCount ++;
+
         $parsed = parse_url($targetURL);
         $template = self::loadMocks($parsed['host'], $parsed['port']);
 

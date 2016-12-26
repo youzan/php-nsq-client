@@ -134,11 +134,45 @@ class MsgFilterTest extends \PHPUnit_Framework_TestCase
 
     public function testShardingMissingPartition()
     {
+        $topic = 'sharding_partition_missing';
+        $expectMsg = 'Target partition not found';
 
+        $exceptionGot = null;
+        try
+        {
+            $bizMsg = new QMessage('msg-data');
+            $bizMsg->setShardingProof(1);
+
+            MsgFilter::getInstance()->getMsgObject($topic, $bizMsg);
+        }
+        catch (Exception $e)
+        {
+            $exceptionGot = $e;
+        }
+
+        $this->assertInstanceOf(ShardingStrategyException::class, $exceptionGot);
+        $this->assertEquals($expectMsg, $exceptionGot->getMessage());
     }
 
     public function testShardingEmptyPartition()
     {
+        $topic = 'sharding_partition_empty';
+        $expectMsg = 'No available partitions';
 
+        $exceptionGot = null;
+        try
+        {
+            $bizMsg = new QMessage('msg-data');
+            $bizMsg->setShardingProof(123);
+
+            MsgFilter::getInstance()->getMsgObject($topic, $bizMsg);
+        }
+        catch (Exception $e)
+        {
+            $exceptionGot = $e;
+        }
+
+        $this->assertInstanceOf(ShardingStrategyException::class, $exceptionGot);
+        $this->assertEquals($expectMsg, $exceptionGot->getMessage());
     }
 }

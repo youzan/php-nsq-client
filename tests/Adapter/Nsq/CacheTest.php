@@ -18,13 +18,14 @@ class CacheTest extends \PHPUnit_Framework_TestCase
         $ttl = 1;
         $exeCounts = 0;
         $callback = function () use (&$exeCounts) {
+            $exeCounts ++;
             return 'hello-'.$exeCounts;
         };
 
         $result1 = Cache::getInstance()->host($key, $callback, $ttl);
-        $this->assertEquals('hello-0', $result1);
+        $this->assertEquals('hello-1', $result1);
 
         $result2 = Cache::getInstance()->host($key, $callback, $ttl);
-        $this->assertEquals('hello-0', $result2);
+        $this->assertEquals('hello-1', $result2);
     }
 }

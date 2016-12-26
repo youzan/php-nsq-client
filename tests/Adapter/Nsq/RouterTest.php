@@ -9,6 +9,7 @@
 namespace Kdt\Iron\Queue\Tests\Adapter\Nsq;
 
 use Kdt\Iron\Queue\Adapter\Nsq\Router;
+use Kdt\Iron\Queue\Tests\classes\nsqphp\HTTP;
 
 class RouterTest extends \PHPUnit_Framework_TestCase
 {
@@ -28,11 +29,31 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     public function testPublishViaType()
     {
-
+        // need "http" for mocking
+        $this->assertEquals('http', Router::getInstance()->fetchPublishViaType());
     }
 
     public function testClearCaches()
     {
+        $topic = 'router_topic_biz';
 
+        $reqCountInit = HTTP::reqCount();
+
+        // begin s1
+        Router::getInstance()->fetchPublishNodes($topic);
+        $reqCountS1 = HTTP::reqCount();
+
+        // s1 will use cache, no http req
+        $this->assertEquals($reqCountInit, $reqCountS1);
+
+        // clear cache
+        Router::getInstance()->clearCaches();
+
+        // begin s2
+        Router::getInstance()->fetchPublishNodes($topic);
+        $reqCountS2 = HTTP::reqCount();
+
+        // s2 will do one http req for lookup a topic
+        $this->assertEquals($reqCountInit + 1, $reqCountS2);
     }
 }
