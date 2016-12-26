@@ -9,6 +9,7 @@
 namespace Kdt\Iron\Queue\Adapter\Nsq;
 
 use Kdt\Iron\Queue\Exception\MissingRoutesException;
+use Kdt\Iron\Queue\Exception\ShardingStrategyException;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
 use nsqphp\Lookup\Cluster;
@@ -102,16 +103,40 @@ class Router
 
     /**
      * @param $topic
+     * @param $partition
      * @return array
      * @throws MissingRoutesException
+     * @throws ShardingStrategyException
      */
-    public function fetchSubscribeNodes($topic)
+    public function fetchSubscribeNodes($topic, $partition = null)
     {
         $nodes = InstanceMgr::getLookupInstance($topic, 'sub')->lookupHosts($this->config->parseTopicName($topic), 'sub');
 
         if (empty($nodes))
         {
             throw new MissingRoutesException('Empty nodes for <'.$topic.'>');
+        }
+
+        if (is_numeric($partition))
+        {
+            $found = null;
+            foreach ($nodes as $node)
+            {
+                if (isset($node['partition']) && $node['partition'] == $partition)
+                {
+                    $found = $node;
+                    break;
+                }
+            }
+
+            if ($found)
+            {
+                $nodes = [$found];
+            }
+            else
+            {
+                throw new ShardingStrategyException('Custom partition not found');
+            }
         }
 
         return $nodes;

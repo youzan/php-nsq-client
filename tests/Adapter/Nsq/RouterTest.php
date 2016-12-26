@@ -9,7 +9,10 @@
 namespace Kdt\Iron\Queue\Tests\Adapter\Nsq;
 
 use Kdt\Iron\Queue\Adapter\Nsq\Router;
+use Kdt\Iron\Queue\Exception\ShardingStrategyException;
 use Kdt\Iron\Queue\Tests\classes\nsqphp\HTTP;
+
+use Exception;
 
 class RouterTest extends \PHPUnit_Framework_TestCase
 {
@@ -39,6 +42,38 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         ];
 
         $this->assertArraySubset($expectInfo, $gotNodes, TRUE);
+    }
+
+    public function testSubscribeNodesCustomPartitionSuccess()
+    {
+        $topic = 'sharding_with_enabled';
+
+        $gotNodes = Router::getInstance()->fetchSubscribeNodes($topic, 1);
+
+        $expectInfo = [
+            ['host' => '127.0.0.1', 'ports' => ['tcp' => 3, 'http' => 3]],
+        ];
+
+        $this->assertArraySubset($expectInfo, $gotNodes, TRUE);
+    }
+
+    public function testSubscribeNodesCustomPartitionMissing()
+    {
+        $topic = 'sharding_with_enabled';
+        $expectMsg = 'Custom partition not found';
+
+        $exceptionGot = null;
+        try
+        {
+            Router::getInstance()->fetchSubscribeNodes($topic, 2);
+        }
+        catch (Exception $e)
+        {
+            $exceptionGot = $e;
+        }
+
+        $this->assertInstanceOf(ShardingStrategyException::class, $exceptionGot);
+        $this->assertEquals($expectMsg, $exceptionGot->getMessage());
     }
 
     public function testPublishViaType()

@@ -92,7 +92,7 @@ class Client implements AdapterInterface
         return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) {
 
             InstanceMgr::getSubInstance($topic)->subscribe(
-                Router::getInstance()->fetchSubscribeNodes($topic),
+                Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']),
                 $this->config->parseTopicName($topic), $channel,
                 function (NsqMessage $msg) use ($callback)
                 {

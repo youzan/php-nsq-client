@@ -87,6 +87,7 @@ class Queue
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
         $options['retry_delay'] = isset($options['retry_delay']) ? $options['retry_delay'] : 5;
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
+        $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
         // pop
         return self::nsq()->pop
         (
