@@ -85,7 +85,7 @@ class Router
             $nodes = $this->cache->host(
                 sprintf($this->cLookupResultsKey, $topic),
                 function() use ($topic) {
-                    return InstanceMgr::getLookupInstance($topic)->lookupHosts($this->config->parseTopicName($topic), 'pub');
+                    return InstanceMgr::getLookupInstance($topic, 'pub')->lookupHosts($this->config->parseTopicName($topic), 'pub');
                 },
                 $this->config->getGlobalSetting('nsq.mem-cache.lookupResultsTTL', $this->cLookupResultsTTL)
             );
@@ -97,6 +97,23 @@ class Router
 
             $this->l2Cache[$cKey] = $nodes;
         }
+        return $nodes;
+    }
+
+    /**
+     * @param $topic
+     * @return array
+     * @throws MissingRoutesException
+     */
+    public function fetchSubscribeNodes($topic)
+    {
+        $nodes = InstanceMgr::getLookupInstance($topic, 'sub')->lookupHosts($this->config->parseTopicName($topic), 'sub');
+
+        if (empty($nodes))
+        {
+            throw new MissingRoutesException('Empty nodes for <'.$topic.'>');
+        }
+
         return $nodes;
     }
 

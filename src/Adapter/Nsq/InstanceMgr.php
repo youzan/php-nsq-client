@@ -199,7 +199,6 @@ class InstanceMgr
         {
             $nsqd = new nsqphp(null, null, null, self::getLoggerInstance());
 
-            $nsqd->setNsLookup(self::touchLookupdInstance($pipe, $config));
             $nsqd->setProxy(self::touchProxyInstance($pipe));
 
             $warningSet = self::getConfig()->getGlobalSetting('nsq.monitor.msg-bag');

@@ -27,6 +27,20 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->assertArraySubset($expectInfo, $gotNodes, TRUE);
     }
 
+    public function testSubscribeNodes()
+    {
+        $topic = 'router_topic_biz';
+
+        $gotNodes = Router::getInstance()->fetchSubscribeNodes($topic);
+
+        $expectInfo = [
+            ['host' => '127.0.0.1', 'ports' => ['tcp' => 33, 'http' => 33]],
+            ['host' => '127.0.0.1', 'ports' => ['tcp' => 34, 'http' => 34]],
+        ];
+
+        $this->assertArraySubset($expectInfo, $gotNodes, TRUE);
+    }
+
     public function testPublishViaType()
     {
         // need "http" for mocking

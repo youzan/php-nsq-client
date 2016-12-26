@@ -43,18 +43,18 @@ class RouterDCCTest extends \PHPUnit_Framework_TestCase
 
         foreach ($testData as $topic => $rw)
         {
-            foreach ($rw as $type => $expect)
+            foreach ($rw as $scene => $expect)
             {
                 list($expCluster, $expLookups) = $expect;
 
-                $pipe = $type == 'sub' ? 'r' : 'w';
+                $pipe = $scene == 'sub' ? 'r' : 'w';
 
-                $gotLookups = Router::getInstance()->fetchGlobalLookups($topic, $type);
+                $gotLookups = Router::getInstance()->fetchGlobalLookups($topic, $scene);
 
                 $gotResult = [$pipe => $gotLookups[$pipe]];
                 $expResult = [$pipe => [$expCluster => $expLookups]];
 
-                $this->assertArraySubset($gotResult, $expResult, TRUE, 'topic='.$topic.',type='.$type);
+                $this->assertArraySubset($gotResult, $expResult, TRUE, 'topic='.$topic.',scene='.$scene);
             }
         }
     }

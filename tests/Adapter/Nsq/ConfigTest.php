@@ -11,6 +11,8 @@ namespace Kdt\Iron\Queue\Tests\Adapter\Nsq;
 use Kdt\Iron\Queue\Adapter\Nsq\Config;
 use Kdt\Iron\Queue\Exception\InvalidConfigException;
 
+use Exception;
+
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
     public function testParseTopicName()
@@ -130,5 +132,20 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testGetGlobalSetting()
     {
         $this->assertEquals('hi', Config::getInstance()->getGlobalSetting('nsq.testing.config.get'));
+    }
+
+    public function testClearTopicCache()
+    {
+        $exceptionWatch = null;
+        try
+        {
+            Config::getInstance()->clearTopicCache();
+        }
+        catch (Exception $e)
+        {
+            $exceptionWatch = $e;
+        }
+
+        $this->assertNull($exceptionWatch);
     }
 }

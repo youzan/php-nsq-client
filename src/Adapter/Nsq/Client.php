@@ -24,23 +24,11 @@ class Client implements AdapterInterface
     private $config = null;
 
     /**
-     * @var MsgFilter
-     */
-    private $msgFilter = null;
-
-    /**
-     * @var Logger
-     */
-    private $logger = null;
-
-    /**
      * Client constructor.
      */
     public function __construct()
     {
         $this->config = Config::getInstance();
-        $this->msgFilter = MsgFilter::getInstance();
-        $this->logger = InstanceMgr::getLoggerInstance();
     }
 
     /**
@@ -54,7 +42,7 @@ class Client implements AdapterInterface
 
             return InstanceMgr::getPubInstance($topic)->publish(
                 $this->config->parseTopicName($topic),
-                $this->msgFilter->getMsgObject($topic, $message)
+                MsgFilter::getInstance()->getMsgObject($topic, $message)
             );
 
         }, $topic);
@@ -73,7 +61,7 @@ class Client implements AdapterInterface
 
             return InstanceMgr::getPubInstance($topic)->publish(
                 $this->config->parseTopicName($topic),
-                $this->msgFilter->getMsgObjectBag($topic, $messages)
+                MsgFilter::getInstance()->getMsgObjectBag($topic, $messages)
             );
 
         }, $topic);
@@ -104,6 +92,7 @@ class Client implements AdapterInterface
         return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) {
 
             InstanceMgr::getSubInstance($topic)->subscribe(
+                Router::getInstance()->fetchSubscribeNodes($topic),
                 $this->config->parseTopicName($topic), $channel,
                 function (NsqMessage $msg) use ($callback)
                 {
@@ -213,7 +202,7 @@ class Client implements AdapterInterface
             $error_code = 1;
             $error_message = implode('|', $result['errors']);
             // logging
-            $this->logger->error('[IRON] Actual failed via (PUB) : ['.$topic.'] ~ ' . $error_message);
+            InstanceMgr::getLoggerInstance()->error('[IRON] Actual failed via (PUB) : ['.$topic.'] ~ ' . $error_message);
         }
         // return result
         return [
