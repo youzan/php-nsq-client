@@ -91,6 +91,21 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->assertArraySubset($expectInfo, $gotNodes, TRUE);
     }
 
+    public function testSubscribeNodesWithPartitionsAndProducers()
+    {
+        $topic = 'router_topic_mtp2';
+
+        $gotNodes = Router::getInstance()->fetchSubscribeNodes($topic);
+
+        $expectInfo = [
+            ['partition' => "0", 'host' => '127.0.0.1', 'ports' => ['tcp' => 100, 'http' => 100]],
+            ['partition' => "1", 'host' => '127.0.0.1', 'ports' => ['tcp' => 100, 'http' => 100]],
+            ['partition' => null,'host' => '127.0.0.1', 'ports' => ['tcp' => 101, 'http' => 102]],
+        ];
+
+        $this->assertArraySubset($expectInfo, $gotNodes, TRUE);
+    }
+
     public function testPublishViaType()
     {
         // need "http" for mocking

@@ -110,5 +110,61 @@
         }
       }
     }
+  },
+  "/lookup?topic=router_topic_mtp2&metainfo=true&access=r": {
+    "request": {},
+    "response": {
+      "channels": [
+        "benchmark"
+      ],
+      "meta": {
+        "partition_num": 2,
+        "replica": 2
+      },
+      "partitions": {
+        "0": {
+          "id": "127.0.0.1:101",
+          "remote_address": "127.0.0.1:101",
+          "hostname": "nsq-1",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 100,
+          "http_port": 100,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:100:101:1"
+        },
+        "1": {
+          "id": "127.0.0.1:102",
+          "remote_address": "127.0.0.1:102",
+          "hostname": "nsq-2",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 100,
+          "http_port": 100,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:100:102:2"
+        }
+      },
+      "producers": [
+        {
+          "id": "127.0.0.1:101",
+          "remote_address": "127.0.0.1:101",
+          "hostname": "nsq-1",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 100,
+          "http_port": 100,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:100:101:1"
+        },
+        {
+          "id": "127.0.0.1:103",
+          "remote_address": "127.0.0.1:103",
+          "hostname": "nsq-3",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 101,
+          "http_port": 102,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:103:103:3"
+        }
+      ]
+    }
   }
 }

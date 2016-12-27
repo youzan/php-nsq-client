@@ -13,5 +13,6 @@ return [
     'topic' => [
         'router_topic_biz' => 'router_topic_nsq',
         'router_topic_mtp' => 'router_topic_mtp',
+        'router_topic_mtp2' => 'router_topic_mtp2',
     ]
 ];
