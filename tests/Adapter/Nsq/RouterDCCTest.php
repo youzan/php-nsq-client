@@ -38,6 +38,10 @@ class RouterDCCTest extends \PHPUnit_Framework_TestCase
             'dsn_topic_dcc_finish' => [
                 'sub' => ['global-dcc-finish', ['http://127.0.0.3:2']],
                 'pub' => ['global-dcc-finish', ['http://127.0.0.3:2']],
+            ],
+            'binlog_dcc_named_special' => [
+                'sub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
+                'pub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
             ]
         ];
 

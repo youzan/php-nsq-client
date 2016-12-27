@@ -17,6 +17,11 @@ class DCCLookupd
     use SingleInstance;
 
     /**
+     * @var string
+     */
+    private $specialGroupPrefix = 'binlog';
+
+    /**
      * @param $clusterName
      * @param $bootParsed
      * @param $topicNamed
@@ -48,9 +53,10 @@ class DCCLookupd
             // DCC related keys
             $defaultKey = '##_default'.$clusterSIGN;
             $topicKey = $topicConfig['topic'];
+            $groupKey = $this->getGroupKey($topicKey, $topicConfig['group']);
             $clientRole = $usingScene == 'pub' ? 'producer' : 'consumer';
 
-            $cloudStrategy = DCC::gets([sprintf($app, $topicConfig['group']), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
+            $cloudStrategy = DCC::gets([sprintf($app, $groupKey), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
 
             $usedStrategy =
                 isset($cloudStrategy[$topicKey])
@@ -154,6 +160,28 @@ class DCCLookupd
         }
 
         return $foundNodes;
+    }
+
+    /**
+     * @param $topicParsed
+     * @param $groupInput
+     * @return string
+     */
+    private function getGroupKey($topicParsed, $groupInput)
+    {
+        $groupL1Pos = strpos($topicParsed, '_');
+        $groupL1Val = substr($topicParsed, 0, $groupL1Pos);
+
+        if ($groupL1Val == $this->specialGroupPrefix)
+        {
+            $groupL2Pos = strpos($topicParsed, '_', $groupL1Pos + 1);
+            $groupL2Val = substr($topicParsed, 0, $groupL2Pos);
+            return $groupL2Val;
+        }
+        else
+        {
+            return $groupInput;
+        }
     }
 
     /**
