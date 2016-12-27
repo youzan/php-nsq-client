@@ -10,6 +10,7 @@ namespace Kdt\Iron\Queue\Adapter\Nsq\Feature;
 
 use Kdt\Iron\Config\Live\DCC;
 use Kdt\Iron\Queue\Adapter\Nsq\Config;
+use Kdt\Iron\Queue\Adapter\Nsq\InstanceMgr;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
 class DCCLookupd
@@ -155,7 +156,12 @@ class DCCLookupd
                 if (isset($parameters['fallback']))
                 {
                     $foundNodes = [$parameters['fallback']];
+                    InstanceMgr::getLoggerInstance()->info('DCC has fallback to '.$parameters['fallback']);
                 }
+            }
+            else
+            {
+                InstanceMgr::getLoggerInstance()->debug('Found lookupd nodes via DCC ~ '.$clusterName.'/'.$topicNamed);
             }
         }
 
