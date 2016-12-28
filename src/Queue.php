@@ -11,7 +11,6 @@ namespace Kdt\Iron\Queue;
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
 use Kdt\Iron\Tracing\Sample\Scene\MQ;
-use Closure;
 
 class Queue
 {
