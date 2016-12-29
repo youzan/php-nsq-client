@@ -18,7 +18,8 @@
   "autoload-dev": {
     "files": ["tests/classes/env.php"],
     "psr-4": {
-      "Kdt\\Iron\\Queue\\Tests\\": "tests"
+      "Kdt\\Iron\\Queue\\Tests\\": "tests/source",
+      "Kdt\\Iron\\Queue\\Tests\\classes\\": "tests/classes"
     }
   }
 }

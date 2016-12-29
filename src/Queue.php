@@ -33,12 +33,17 @@ class Queue
      * queue msg publish
      * @param $topic
      * @param $message
+     * @param $options
      * @return bool
      */
-    public static function push($topic, $message)
+    public static function push($topic, $message, array $options = [])
     {
+        // options
+        $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
+        $options['retry_delay_ms'] = isset($options['retry_delay_ms']) ? $options['retry_delay_ms'] : 10;
+        // push
         $TID = MQ::actionBegin($topic, 'publish');
-        $result = self::nsq()->push($topic, $message);
+        $result = self::nsq()->push($topic, $message, $options);
         MQ::actionFinish($TID);
         if ($result['error_code'])
         {
@@ -55,11 +60,16 @@ class Queue
      * queue msg publish (bulk)
      * @param $topic
      * @param $messages
+     * @param $options
      * @return bool
      */
-    public static function bulkPush($topic, array $messages)
+    public static function bulkPush($topic, array $messages, array $options = [])
     {
-        $result = self::nsq()->bulk($topic, $messages);
+        // options
+        $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
+        $options['retry_delay_ms'] = isset($options['retry_delay_ms']) ? $options['retry_delay_ms'] : 10;
+        // push
+        $result = self::nsq()->bulk($topic, $messages, $options);
         if ($result['error_code'])
         {
             self::$lastPushError = $result['error_message'];
@@ -78,7 +88,7 @@ class Queue
      * @param $options
      * @return string
      */
-    public static function pop($topic, callable $callback, $options = [])
+    public static function pop($topic, callable $callback, array $options = [])
     {
         // options
         $options['auto_delete'] = isset($options['auto_delete']) ? $options['auto_delete'] : false;

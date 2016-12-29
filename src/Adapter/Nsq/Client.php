@@ -34,9 +34,10 @@ class Client implements AdapterInterface
     /**
      * @param $topic
      * @param $message
+     * @param $options
      * @return array
      */
-    public function push($topic, $message)
+    public function push($topic, $message, array $options = [])
     {
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $message) {
 
@@ -45,7 +46,7 @@ class Client implements AdapterInterface
                 MsgFilter::getInstance()->getMsgObject($topic, $message)
             );
 
-        }, $topic);
+        }, $topic, $options['max_retry'], $options['retry_delay_ms']);
 
         return $this->makePubResult($topic, $result);
     }
@@ -53,9 +54,10 @@ class Client implements AdapterInterface
     /**
      * @param $topic
      * @param $messages
+     * @param $options
      * @return array
      */
-    public function bulk($topic, array $messages)
+    public function bulk($topic, array $messages, array $options = [])
     {
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $messages) {
 
@@ -64,7 +66,7 @@ class Client implements AdapterInterface
                 MsgFilter::getInstance()->getMsgObjectBag($topic, $messages)
             );
 
-        }, $topic);
+        }, $topic, $options['max_retry'], $options['retry_delay_ms']);
 
         return $this->makePubResult($topic, $result);
     }

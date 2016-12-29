@@ -69,14 +69,18 @@ class HTTP
             $request = $template[$uri]['request'];
             $response = $template[$uri]['response'];
 
-            if ($request)
+            if ($request && $request != $expectSubmit)
             {
-                // check request
-                throw new \Exception('Temp not implemented');
+                return [[1, "Request data wrongs <{$expectSubmit}|{$request}>"], null];
+            }
+
+            if ($response)
+            {
+                return [null, json_encode($response)];
             }
             else
             {
-                return [null, json_encode($response)];
+                return [[1, "Non response defined"], null];
             }
         }
         else
