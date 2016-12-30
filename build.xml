@@ -38,7 +38,7 @@
         <exec executable="${basedir}/vendor/bin/phpunit" failonerror="true">
             <arg value="tests"/>
             <arg value="--repeat"/>
-            <arg value="1000"/>
+            <arg value="100"/>
         </exec>
     </target>
 </project>
