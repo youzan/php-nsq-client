@@ -1,0 +1,33 @@
+{
+  "/listlookup": {
+    "request": {},
+    "response": {
+      "lookupdleader": {
+        "ID": "127.0.0.2:2:2:nsqlookup",
+        "NodeIP": "127.0.0.2",
+        "TcpPort": "22",
+        "HttpPort": "22",
+        "RpcPort": "22",
+        "Epoch": 0
+      },
+      "lookupdnodes": [
+        {
+          "ID": "127.0.0.2:1:1:nsqlookup",
+          "NodeIP": "127.0.0.2",
+          "TcpPort": "11",
+          "HttpPort": "11",
+          "RpcPort": "11",
+          "Epoch": 0
+        },
+        {
+          "ID": "127.0.0.2:2:2:nsqlookup",
+          "NodeIP": "127.0.0.2",
+          "TcpPort": "22",
+          "HttpPort": "22",
+          "RpcPort": "22",
+          "Epoch": 0
+        }
+      ]
+    }
+  }
+}

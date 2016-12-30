@@ -8,7 +8,7 @@
 
 namespace Kdt\Iron\Queue\Exception;
 
-abstract class NonCatchableException extends \Exception_System
+abstract class NonCatchableException extends \Exception
 {
 
 }

@@ -2,7 +2,7 @@
   "name": "kdt-lib/queue",
   "repositories": {"packagist": {"type": "composer", "url": "http://packagist.qima-inc.com"}},
   "require": {
-    "moolex/nsqphp": "1.2.6",
+    "moolex/nsqphp": "dev-master",
     "kdt-lib/cache": "~1.0.0",
     "kdt-lib/config": "~1.0.0",
     "kdt-lib/tracing": "~1.0.0"
@@ -18,7 +18,8 @@
   "autoload-dev": {
     "files": ["tests/classes/env.php"],
     "psr-4": {
-      "Kdt\\Iron\\Queue\\Tests\\": "tests"
+      "Kdt\\Iron\\Queue\\Tests\\": "tests/source",
+      "Kdt\\Iron\\Queue\\Tests\\classes\\": "tests/classes"
     }
   }
 }
