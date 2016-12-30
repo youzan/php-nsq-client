@@ -10,10 +10,22 @@ namespace Kdt\Iron\Queue\Adapter\Nsq;
 
 use Kdt\Iron\Log\Log;
 use nsqphp\Logger\LoggerInterface;
-use Config;
 
 class Logger implements LoggerInterface
 {
+    /**
+     * @var string
+     */
+    private $runEnv = 'online';
+
+    /**
+     * Logger constructor.
+     */
+    public function __construct()
+    {
+        $this->runEnv = Config::getInstance()->getGlobalSetting('run_mode');
+    }
+
     /**
      * Log error
      *
@@ -51,7 +63,7 @@ class Logger implements LoggerInterface
      */
     public function debug($msg)
     {
-        if (Config::get('run_mode') == 'test')
+        if ($this->runEnv == 'test')
         {
             $msgOrigin = $this->msg($msg);
             $msgShort = substr($msgOrigin, 0, 128);
@@ -64,7 +76,7 @@ class Logger implements LoggerInterface
      */
     private function getLogger()
     {
-        return Log::getInstance(\Exception_Handler::SYS_APP_NAME, 'nsq.client');
+        return Log::getInstance('php-framework', 'nsq.client');
     }
 
     /**

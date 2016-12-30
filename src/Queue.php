@@ -11,7 +11,6 @@ namespace Kdt\Iron\Queue;
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
 use Kdt\Iron\Tracing\Sample\Scene\MQ;
-use Closure;
 
 class Queue
 {
@@ -34,12 +33,17 @@ class Queue
      * queue msg publish
      * @param $topic
      * @param $message
+     * @param $options
      * @return bool
      */
-    public static function push($topic, $message)
+    public static function push($topic, $message, array $options = [])
     {
+        // options
+        $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
+        $options['retry_delay_ms'] = isset($options['retry_delay_ms']) ? $options['retry_delay_ms'] : 10;
+        // push
         $TID = MQ::actionBegin($topic, 'publish');
-        $result = self::nsq()->push($topic, $message);
+        $result = self::nsq()->push($topic, $message, $options);
         MQ::actionFinish($TID);
         if ($result['error_code'])
         {
@@ -56,11 +60,16 @@ class Queue
      * queue msg publish (bulk)
      * @param $topic
      * @param $messages
+     * @param $options
      * @return bool
      */
-    public static function bulkPush($topic, array $messages)
+    public static function bulkPush($topic, array $messages, array $options = [])
     {
-        $result = self::nsq()->bulk($topic, $messages);
+        // options
+        $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
+        $options['retry_delay_ms'] = isset($options['retry_delay_ms']) ? $options['retry_delay_ms'] : 10;
+        // push
+        $result = self::nsq()->bulk($topic, $messages, $options);
         if ($result['error_code'])
         {
             self::$lastPushError = $result['error_message'];
@@ -75,19 +84,19 @@ class Queue
     /**
      * queue subscribe
      * @param $topic
-     * @param Closure $callback
+     * @param callable $callback
      * @param $options
      * @return string
      */
-    public static function pop($topic, Closure $callback, $options = [])
+    public static function pop($topic, callable $callback, array $options = [])
     {
         // options
         $options['auto_delete'] = isset($options['auto_delete']) ? $options['auto_delete'] : false;
         $options['keep_seconds'] = self::filterKeepSeconds(isset($options['keep_seconds']) ? $options['keep_seconds'] : self::$maxKeepSeconds);
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
         $options['retry_delay'] = isset($options['retry_delay']) ? $options['retry_delay'] : 5;
-        $options['exception_observer'] = isset($options['exception_observer']) ? $options['exception_observer'] : null;
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
+        $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
         // pop
         return self::nsq()->pop
         (

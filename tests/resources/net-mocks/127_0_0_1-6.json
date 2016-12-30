@@ -1,0 +1,6 @@
+{
+  "/postAPITest": {
+    "request": "post-body",
+    "response": "success for mock"
+  }
+}
