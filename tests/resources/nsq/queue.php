@@ -13,5 +13,6 @@ return [
     'topic' => [
         'queue_push_normal' => 'q_push_normal',
         'queue_push_failed' => 'q_push_failed',
+        'queue_push_bulk' => 'q_push_bulk',
     ]
 ];

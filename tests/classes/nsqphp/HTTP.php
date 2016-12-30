@@ -69,9 +69,20 @@ class HTTP
             $request = $template[$uri]['request'];
             $response = $template[$uri]['response'];
 
-            if ($request && $request != $expectSubmit)
+            if ($request)
             {
-                return [[1, "Request data wrongs <{$expectSubmit}|{$request}>"], null];
+                if (is_string($request))
+                {
+                    if (substr($request, 0, 5) == '[BIN]')
+                    {
+                        $request = hex2bin(substr($request, 5));
+                    }
+                }
+
+                if ($request != $expectSubmit)
+                {
+                    return [[1, "Request data wrongs <{$expectSubmit}|{$request}>"], null];
+                }
             }
 
             if ($response)

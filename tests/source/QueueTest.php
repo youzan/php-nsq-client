@@ -33,4 +33,14 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(false, $result);
         $this->assertEquals($reason, Queue::lastPushError());
     }
+
+    public function testPushBulk()
+    {
+        $topic = 'queue.push.bulk';
+        $msgs = ['hi 1', 'hi 2'];
+
+        $result = Queue::bulkPush($topic, $msgs);
+
+        $this->assertEquals(true, $result);
+    }
 }

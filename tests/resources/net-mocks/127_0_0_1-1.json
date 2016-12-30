@@ -6,8 +6,8 @@
         "benchmark"
       ],
       "meta": {
-        "partition_num": 1,
-        "replica": 1
+        "partition_num": 2,
+        "replica": 2
       },
       "partitions": {
         "0": {
@@ -19,11 +19,27 @@
           "http_port": 1,
           "version": "0.3.7-HA.1.5.3",
           "distributed_id": "127.0.0.1:1:1:1"
+        },
+        "1": {
+          "id": "127.0.0.1:1",
+          "remote_address": "127.0.0.1:1",
+          "hostname": "nsq-1",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 1,
+          "http_port": 1,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:1:1:1"
         }
       }
     }
   },
   "/pub?topic=q_push_normal&partition=0": {
+    "request": "\"hello world\"",
+    "response": {
+      "status": "OK"
+    }
+  },
+  "/pub?topic=q_push_normal&partition=1": {
     "request": "\"hello world\"",
     "response": {
       "status": "OK"
@@ -59,6 +75,32 @@
       "status": "FAIL",
       "status_code": 500,
       "status_txt": "door closed"
+    }
+  },
+  "/lookup?topic=q_push_bulk&metainfo=true&access=w": {
+    "request": {},
+    "response": {
+      "channels": [
+        "benchmark"
+      ],
+      "producers": [
+        {
+          "id": "127.0.0.1:1",
+          "remote_address": "127.0.0.1:1",
+          "hostname": "nsq-0",
+          "broadcast_address": "127.0.0.1",
+          "tcp_port": 1,
+          "http_port": 1,
+          "version": "0.3.7-HA.1.5.3",
+          "distributed_id": "127.0.0.1:1:1:1"
+        }
+      ]
+    }
+  },
+  "/mpub?topic=q_push_bulk&binary=true": {
+    "request": "[BIN]000000020000000622686920312200000006226869203222",
+    "response": {
+      "status": "OK"
     }
   }
 }
