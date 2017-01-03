@@ -47,11 +47,19 @@ class RouterDSNTest extends \PHPUnit_Framework_TestCase
     public function testTranslateDiscovery()
     {
         $lookups = Router::getInstance()->fetchGlobalLookups('dsn_topic_discovery');
-        $clusterName = 'lookupd-dsn-discovery';
         $dynLookups = ['http://127.0.0.2:11', 'http://127.0.0.2:22'];
+        $clusterName = 'lookupd-dsn-discovery';
+
+        $this->assertTrue(in_array(current($lookups['r'][$clusterName]), $dynLookups));
+        $this->assertTrue(in_array(current($lookups['w'][$clusterName]), $dynLookups));
+    }
+
+    public function testTranslateDiscoveryNon()
+    {
+        $lookups = Router::getInstance()->fetchGlobalLookups('dsn_topic_discovery_non');
         $expect = [
-            'r' => [$clusterName => $dynLookups],
-            'w' => [$clusterName => $dynLookups],
+            'r' => ['lookupd-dsn-discovery-non' => ['http://127.0.0.2:7']],
+            'w' => ['lookupd-dsn-discovery-non' => ['http://127.0.0.2:7']],
         ];
 
         $this->assertArraySubset($lookups, $expect, TRUE);
