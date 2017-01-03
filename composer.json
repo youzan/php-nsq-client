@@ -2,7 +2,7 @@
   "name": "kdt-lib/queue",
   "repositories": {"packagist": {"type": "composer", "url": "http://packagist.qima-inc.com"}},
   "require": {
-    "moolex/nsqphp": "dev-master",
+    "moolex/nsqphp": "~1.3.0",
     "kdt-lib/cache": "~1.0.0",
     "kdt-lib/config": "~1.0.0",
     "kdt-lib/tracing": "~1.0.0"
