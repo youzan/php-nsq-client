@@ -1,0 +1,33 @@
+{
+  "/listlookup": {
+    "request": {},
+    "response": {
+      "lookupdleader": {
+        "ID": "127.0.0.2:1:1:nsqlookup",
+        "NodeIP": "127.0.0.2",
+        "TcpPort": "-1",
+        "HttpPort": "-1",
+        "RpcPort": "-1",
+        "Epoch": 0
+      },
+      "lookupdnodes": [
+        {
+          "ID": "127.0.0.2:1:1:nsqlookup",
+          "NodeIP": "127.0.0.2",
+          "TcpPort": "-1",
+          "HttpPort": "-1",
+          "RpcPort": "-1",
+          "Epoch": 0
+        },
+        {
+          "ID": "127.0.0.2:2:2:nsqlookup",
+          "NodeIP": "~bad-host",
+          "TcpPort": "1024",
+          "HttpPort": "1024",
+          "RpcPort": "1024",
+          "Epoch": 0
+        }
+      ]
+    }
+  }
+}

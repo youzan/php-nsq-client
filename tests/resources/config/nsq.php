@@ -16,6 +16,7 @@ return [
     'nsq.server.lookupd.lookupd-dsn-normal' => ['http://127.0.0.1:2'],
     'nsq.server.lookupd.lookupd-dsn-balanced' => ['http://127.0.0.1:2', 'http://127.0.0.1:3'],
     'nsq.server.lookupd.lookupd-dsn-discovery' => ['http://127.0.0.2:1'],
+    'nsq.server.lookupd.lookupd-dsn-discovery-non' => ['http://127.0.0.2:7'],
 
     'nsq.server.lookupd.lookupd-sp-missing' => ['http://127.0.0.2:8'],
     'nsq.server.lookupd.lookupd-sp-empty' => ['http://127.0.0.2:8'],

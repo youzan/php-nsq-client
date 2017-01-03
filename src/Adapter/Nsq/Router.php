@@ -196,7 +196,8 @@ class Router
         {
             try
             {
-                $foundNodes = $this->cache->host(
+                $foundNodes = [];
+                $dynamicNodes = $this->cache->host(
                     sprintf($this->cLookupdNodesKey, $seedHost, $seedPort),
                     function() use ($seedHost, $seedPort) {
                         return (new Cluster($seedHost, $seedPort))->getSlaves();
@@ -204,11 +205,13 @@ class Router
                     $this->config->getGlobalSetting('nsq.mem-cache.lookupdNodesTTL', $this->cLookupdNodesTTL)
                 ) ?: [];
 
-                foreach ($foundNodes as $idx => $nodeURL)
+                shuffle($dynamicNodes);
+                foreach ($dynamicNodes as $idx => $nodeURL)
                 {
-                    if (filter_var($nodeURL, FILTER_VALIDATE_URL) === false)
+                    if (filter_var($nodeURL, FILTER_VALIDATE_URL))
                     {
-                        unset($foundNodes[$idx]);
+                        $foundNodes[] = $nodeURL;
+                        break;
                     }
                 }
 
