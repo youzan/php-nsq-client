@@ -57,12 +57,12 @@ class HATest extends \PHPUnit_Framework_TestCase
     /**
      * @var int
      */
-    private $leastKeepSeconds = 10;
+    private $leastKeepSeconds = 12;
 
     /**
      * @var int
      */
-    private $mostIgnoreSeconds = 9;
+    private $mostIgnoreSeconds = 8;
 
     public function testPubRetryingWithOK()
     {
