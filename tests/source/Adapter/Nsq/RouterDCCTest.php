@@ -42,7 +42,11 @@ class RouterDCCTest extends \PHPUnit_Framework_TestCase
             'binlog_dcc_named_special' => [
                 'sub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
                 'pub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
-            ]
+            ],
+            'dsn_topic_named_special' => [
+                'sub' => ['global-dcc-sp-name', ['http://127.0.0.3:3']],
+                'pub' => ['global-dcc-sp-name', ['http://127.0.0.3:3']],
+            ],
         ];
 
         foreach ($testData as $topic => $rw)

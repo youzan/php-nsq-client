@@ -54,7 +54,7 @@ class DCCLookupd
             // DCC related keys
             $defaultKey = '##_default'.$clusterSIGN;
             $topicKey = $topicConfig['topic'];
-            $groupKey = $this->getGroupKey($topicKey, $topicConfig['group']);
+            $groupKey = $this->getGroupKey($topicKey);
             $clientRole = $usingScene == 'pub' ? 'producer' : 'consumer';
 
             $cloudStrategy = DCC::gets([sprintf($app, $groupKey), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
@@ -170,10 +170,9 @@ class DCCLookupd
 
     /**
      * @param $topicParsed
-     * @param $groupInput
      * @return string
      */
-    private function getGroupKey($topicParsed, $groupInput)
+    private function getGroupKey($topicParsed)
     {
         $groupL1Pos = strpos($topicParsed, '_');
         $groupL1Val = substr($topicParsed, 0, $groupL1Pos);
@@ -182,11 +181,12 @@ class DCCLookupd
         {
             $groupL2Pos = strpos($topicParsed, '_', $groupL1Pos + 1);
             $groupL2Val = substr($topicParsed, 0, $groupL2Pos);
+
             return $groupL2Val;
         }
         else
         {
-            return $groupInput;
+            return $groupL1Val;
         }
     }
 
