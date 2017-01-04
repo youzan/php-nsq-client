@@ -21,6 +21,8 @@ return [
         'dsn_topic_dcc_moving_gray_hit' => ['global-dcc-moving' => 'rw'],
         'dsn_topic_dcc_moving_non' => ['global-dcc-moving' => 'rw'],
         'dsn_topic_dcc_finish' => ['global-dcc-finish' => 'rw'],
+
+        'dsn_topic_named_special' => ['global-dcc-sp-name' => 'rw'],
     ],
     'topic' => [
         'dsn_topic_syntax_old' => 'dsn_topic_syntax_old',
@@ -35,5 +37,7 @@ return [
         'dsn_topic_dcc_moving_gray_hit' => 'dsn_topic_dcc_moving_gray_hit',
         'dsn_topic_dcc_moving_non' => 'dsn_topic_dcc_moving_non',
         'dsn_topic_dcc_finish' => 'dsn_topic_dcc_finish',
+
+        'dsn_topic_named_special' => 'special_topic_name_for_dsn',
     ]
 ];

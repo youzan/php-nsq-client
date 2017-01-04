@@ -27,4 +27,6 @@ return [
     'nsq.server.lookupd.global-dcc-finish' => ['dcc://local/parameters?query=%s.nsq.lookupd.addr~%s&fallback=http://127.0.0.3:12345'],
 
     'nsq.server.lookupd.global-dcc-binlog' => ['dcc://local/parameters?query=%s.nsq.lookupd.addr~%s&fallback=http://127.0.0.3:12345'],
+
+    'nsq.server.lookupd.global-dcc-sp-name' => ['dcc://local/parameters?query=%s.nsq.lookupd.addr~%s&fallback=http://127.0.0.3:12345'],
 ];
