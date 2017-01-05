@@ -13,6 +13,8 @@ use Kdt\Iron\Queue\Adapter\Nsq\Config;
 use Kdt\Iron\Queue\Adapter\Nsq\InstanceMgr;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
+use Exception as SysException;
+
 class DCCLookupd
 {
     use SingleInstance;
@@ -57,7 +59,14 @@ class DCCLookupd
             $groupKey = $this->getGroupKey($topicKey);
             $clientRole = $usingScene == 'pub' ? 'producer' : 'consumer';
 
-            $cloudStrategy = DCC::gets([sprintf($app, $groupKey), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
+            try
+            {
+                $cloudStrategy = DCC::gets([sprintf($app, $groupKey), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
+            }
+            catch (SysException $e)
+            {
+                $cloudStrategy = [];
+            }
 
             $usedStrategy =
                 isset($cloudStrategy[$topicKey])
@@ -180,14 +189,14 @@ class DCCLookupd
         if ($groupL1Val == $this->specialGroupPrefix)
         {
             $groupL2Pos = strpos($topicParsed, '_', $groupL1Pos + 1);
-            $groupL2Val = substr($topicParsed, 0, $groupL2Pos);
+            if ($groupL2Pos)
+            {
+                $groupL2Val = substr($topicParsed, 0, $groupL2Pos);
+                return $groupL2Val;
+            }
+        }
 
-            return $groupL2Val;
-        }
-        else
-        {
-            return $groupL1Val;
-        }
+        return $groupL1Val;
     }
 
     /**

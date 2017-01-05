@@ -12,5 +12,6 @@ return [
     ],
     'topic' => [
         'binlog_dcc_named_special' => 'binlog_dcc_named_special',
+        'binlog_dcc_named_odd_1' => 'binlog_odd1',
     ]
 ];
