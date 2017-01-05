@@ -1,0 +1,7 @@
+{
+  "binlog_lv1only": {
+    "current": [
+      "http://127.0.0.3:4"
+    ]
+  }
+}

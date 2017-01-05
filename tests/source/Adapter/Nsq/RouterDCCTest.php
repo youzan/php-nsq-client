@@ -47,6 +47,14 @@ class RouterDCCTest extends \PHPUnit_Framework_TestCase
                 'sub' => ['global-dcc-sp-name', ['http://127.0.0.3:3']],
                 'pub' => ['global-dcc-sp-name', ['http://127.0.0.3:3']],
             ],
+            'odd_topic_name_1' => [
+                'sub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
+                'pub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
+            ],
+            'odd_topic_name_2' => [
+                'sub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
+                'pub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
+            ],
         ];
 
         foreach ($testData as $topic => $rw)
