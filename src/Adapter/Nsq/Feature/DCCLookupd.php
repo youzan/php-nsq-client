@@ -13,6 +13,8 @@ use Kdt\Iron\Queue\Adapter\Nsq\Config;
 use Kdt\Iron\Queue\Adapter\Nsq\InstanceMgr;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
+use Exception as SysException;
+
 class DCCLookupd
 {
     use SingleInstance;
@@ -57,7 +59,14 @@ class DCCLookupd
             $groupKey = $this->getGroupKey($topicKey);
             $clientRole = $usingScene == 'pub' ? 'producer' : 'consumer';
 
-            $cloudStrategy = DCC::gets([sprintf($app, $groupKey), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
+            try
+            {
+                $cloudStrategy = DCC::gets([sprintf($app, $groupKey), sprintf($module, $clientRole)], [$defaultKey, $topicKey]);
+            }
+            catch (SysException $e)
+            {
+                $cloudStrategy = [];
+            }
 
             $usedStrategy =
                 isset($cloudStrategy[$topicKey])
@@ -175,19 +184,24 @@ class DCCLookupd
     private function getGroupKey($topicParsed)
     {
         $groupL1Pos = strpos($topicParsed, '_');
-        $groupL1Val = substr($topicParsed, 0, $groupL1Pos);
-
-        if ($groupL1Val == $this->specialGroupPrefix)
+        if ($groupL1Pos)
         {
-            $groupL2Pos = strpos($topicParsed, '_', $groupL1Pos + 1);
-            $groupL2Val = substr($topicParsed, 0, $groupL2Pos);
+            $groupL1Val = substr($topicParsed, 0, $groupL1Pos);
+            if ($groupL1Val == $this->specialGroupPrefix)
+            {
+                $groupL2Pos = strpos($topicParsed, '_', $groupL1Pos + 1);
+                if ($groupL2Pos)
+                {
+                    $groupL2Val = substr($topicParsed, 0, $groupL2Pos);
 
-            return $groupL2Val;
-        }
-        else
-        {
+                    return $groupL2Val;
+                }
+            }
+
             return $groupL1Val;
         }
+
+        return $topicParsed;
     }
 
     /**
