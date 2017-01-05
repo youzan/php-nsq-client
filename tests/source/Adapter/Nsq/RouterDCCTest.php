@@ -43,13 +43,17 @@ class RouterDCCTest extends \PHPUnit_Framework_TestCase
                 'sub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
                 'pub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
             ],
-            'binlog_dcc_named_odd_1' => [
-                'sub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
-                'pub' => ['global-dcc-binlog', ['http://127.0.0.3:2']],
-            ],
             'dsn_topic_named_special' => [
                 'sub' => ['global-dcc-sp-name', ['http://127.0.0.3:3']],
                 'pub' => ['global-dcc-sp-name', ['http://127.0.0.3:3']],
+            ],
+            'odd_topic_name_1' => [
+                'sub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
+                'pub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
+            ],
+            'odd_topic_name_2' => [
+                'sub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
+                'pub' => ['global-dcc-odd', ['http://127.0.0.3:4']],
             ],
         ];
 

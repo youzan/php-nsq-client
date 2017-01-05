@@ -1,7 +1,7 @@
 {
-  "binlog_odd1": {
+  "binlog_lv1only": {
     "current": [
-      "http://127.0.0.3:2"
+      "http://127.0.0.3:4"
     ]
   }
 }
