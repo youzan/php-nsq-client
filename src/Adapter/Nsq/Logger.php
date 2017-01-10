@@ -14,19 +14,6 @@ use nsqphp\Logger\LoggerInterface;
 class Logger implements LoggerInterface
 {
     /**
-     * @var string
-     */
-    private $runEnv = 'online';
-
-    /**
-     * Logger constructor.
-     */
-    public function __construct()
-    {
-        $this->runEnv = Config::getInstance()->getGlobalSetting('run_mode');
-    }
-
-    /**
      * Log error
      *
      * @param string|\Exception $msg
@@ -63,11 +50,15 @@ class Logger implements LoggerInterface
      */
     public function debug($msg)
     {
-        if ($this->runEnv == 'test')
+        $msgOrigin = $this->msg($msg);
+        $msgLength = strlen($msgOrigin);
+        if ($msgLength > 128)
         {
-            $msgOrigin = $this->msg($msg);
-            $msgShort = substr($msgOrigin, 0, 128);
-            $this->getLogger()->debug($msgShort, null, $msgOrigin);
+            $this->getLogger()->debug(substr($msgOrigin, 0, 128), null, ['origin' => $msgOrigin]);
+        }
+        else
+        {
+            $this->getLogger()->debug($msgOrigin);
         }
     }
 
