@@ -1,0 +1,23 @@
+{
+  "name": "youzan/nsq-client",
+  "config": {
+    "secure-http": false
+  },
+  "repositories": {"packagist": {"type": "composer", "url": "http://packagist.qima-inc.com"}},
+  "require": {
+    "moolex/nsqphp": "~1.3.0",
+    "kdt-lib/cache": "~1.0.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.2.9"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kdt\\Iron\\Queue\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "files": ["tests/classes/env.php"],
+    "psr-4": {}
+  }
+}
