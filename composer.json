@@ -1,12 +1,7 @@
 {
   "name": "youzan/nsq-client",
-  "config": {
-    "secure-http": false
-  },
-  "repositories": {"packagist": {"type": "composer", "url": "http://packagist.qima-inc.com"}},
   "require": {
     "moolex/nsqphp": "~1.3.0",
-    "kdt-lib/cache": "~1.0.0"
   },
   "require-dev": {
     "phpunit/phpunit": "5.2.9"
