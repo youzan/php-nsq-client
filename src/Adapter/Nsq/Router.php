@@ -25,11 +25,6 @@ class Router
      */
     private $config = null;
 
-    // /**
-    //  * @var Cache
-    //  */
-    //private $cache = null;
-
     /**
      * @var array
      */
@@ -65,7 +60,6 @@ class Router
         HA::getInstance()->registerEvent(HA::EVENT_RETRYING, [$this, 'cleanWhenSrvRetrying']);
 
         $this->config = Config::getInstance();
-        //$this->cache = Cache::getInstance();
     }
 
     /**
@@ -221,7 +215,6 @@ class Router
      */
     public function clearCaches()
     {
-        //$this->cache->clear();
         unset($this->l2Cache);
     }
 

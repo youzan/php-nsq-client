@@ -116,7 +116,6 @@ class DSN
         {
             return $this->cachedDSNs[$cKey];
         }
-
         $config = $this->balancedPicking($this->config->getGlobalSetting('nsq.server.lookupd.'.$clusterName));
 
         if (is_numeric(strpos($config, '://')))

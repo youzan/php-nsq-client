@@ -13,6 +13,7 @@ use nsqphp\Logger\LoggerInterface;
 
 class Logger implements LoggerInterface
 {
+    private $logger;
     /**
      * Log error
      *
@@ -20,7 +21,10 @@ class Logger implements LoggerInterface
      */
     public function error($msg)
     {
-        $this->getLogger()->error($this->msg($msg));
+        if ($this->logger != null)
+        {
+            $this->getLogger()->error($this->msg($msg));
+        }
     }
 
     /**
@@ -30,7 +34,10 @@ class Logger implements LoggerInterface
      */
     public function warn($msg)
     {
-        $this->getLogger()->warn($this->msg($msg));
+        if ($this->logger != null)
+        {
+            $this->getLogger()->warn($this->msg($msg));
+        }
     }
 
     /**
@@ -40,7 +47,10 @@ class Logger implements LoggerInterface
      */
     public function info($msg)
     {
-        $this->getLogger()->info($this->msg($msg));
+        if ($this->logger != null)
+        {
+            $this->getLogger()->info($this->msg($msg));
+        }
     }
 
     /**
@@ -50,6 +60,10 @@ class Logger implements LoggerInterface
      */
     public function debug($msg)
     {
+        if ($this->logger == null)
+        {
+            return;
+        }
         $msgOrigin = $this->msg($msg);
         $msgLength = strlen($msgOrigin);
         if ($msgLength > 128)
@@ -67,7 +81,7 @@ class Logger implements LoggerInterface
      */
     private function getLogger()
     {
-        return Log::getInstance('php-framework', 'nsq.client');
+        return $this->logger;
     }
 
     /**

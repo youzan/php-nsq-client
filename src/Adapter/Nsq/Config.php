@@ -11,8 +11,6 @@ namespace Kdt\Iron\Queue\Adapter\Nsq;
 use Kdt\Iron\Queue\Exception\InvalidConfigException;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
-use Config as IronConfig;
-
 use Exception as SysException;
 
 class Config
@@ -24,6 +22,7 @@ class Config
      */
     private $topicMapCaches = [];
 
+    private $globalSetting = [];
     /**
      * Config constructor.
      */
@@ -99,7 +98,12 @@ class Config
      */
     public function getGlobalSetting($key, $default = null)
     {
-        return IronConfig::get($key) ?: $default;
+        return $this->globalSetting[$key] ?: $default;
+    }
+
+    public function setGlobalSetting($setting)
+    {
+        $this->globalSetting = $setting;
     }
 
     /**
@@ -133,7 +137,7 @@ class Config
     /**
      * @param $config array topic config
      */
-    public function addTopicConfig($config) {
+    public function addTopicConfig($groupName, $config) {
         // lookupd pool
         $lookupdServers = [];
         $lookupdPool = [];
