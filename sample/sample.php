@@ -25,11 +25,19 @@ use Kdt\Iron\Queue\Queue;
 use Kdt\Iron\Queue\Message;
 use Kdt\Iron\Queue\Adapter\Nsq\Config;
 
-$loopup = 'http://10.9.80.209:4161';
 $topic = 'test';
-$message = 'hello world';
-Config::getInstance()->setGlobalSetting($setting);
-Config::getInstance()->addTopicConfig('test', $config);
+$channel = 'test';
+$message0 = 'hello world';
+$message1 = ['hello', 'world'];
 
-var_dump(Queue::push($topic, $message));
+Config::getInstance()->setGlobalSetting($setting);
+Config::getInstance()->addTopicConfig($topic, $config);
+
+var_dump(Queue::push($topic, $message0));
+var_dump(Queue::push($topic, $message1));
+
+var_dump(Queue::pop([$topic, $channel], function($message) {
+    var_dump($message);
+    //Queue::exitPop();
+}));
 
