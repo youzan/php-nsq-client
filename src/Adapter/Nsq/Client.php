@@ -109,13 +109,14 @@ class Client implements AdapterInterface
                     ]);
                 },
                 $options['auto_delete'],
-                $options['sub_ordered']
+                $options['sub_ordered'],
+                $options['msg_timeout']
             )
                 ->run($maxKeepSeconds);
 
             return false;
 
-        }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay'], $option['msg_timeout']);
+        }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);
     }
 
     /**
