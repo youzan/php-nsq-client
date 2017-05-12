@@ -115,7 +115,7 @@ class Client implements AdapterInterface
 
             return false;
 
-        }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);
+        }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay'], $option['msg_timeout']);
     }
 
     /**
