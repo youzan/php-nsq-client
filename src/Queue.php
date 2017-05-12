@@ -10,6 +10,7 @@ namespace Kdt\Iron\Queue;
 
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
+use Kdt\Iron\Tracing\Sample\Scene\MQ;
 
 class Queue
 {
@@ -94,6 +95,7 @@ class Queue
         $options['retry_delay'] = isset($options['retry_delay']) ? $options['retry_delay'] : 5;
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
         $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
+        $options['msg_timeout'] = isset($options['msg_timeout']) ? intval($options['msg_timeout']) : null;
         // pop
         return self::nsq()->pop
         (

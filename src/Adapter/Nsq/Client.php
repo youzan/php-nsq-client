@@ -88,9 +88,7 @@ class Client implements AdapterInterface
         {
             $channel = 'default';
         }
-
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
-
         return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) {
 
             InstanceMgr::getSubInstance($topic)->subscribe(
@@ -109,7 +107,8 @@ class Client implements AdapterInterface
                     ]);
                 },
                 $options['auto_delete'],
-                $options['sub_ordered']
+                $options['sub_ordered'],
+                $options['msg_timeout']
             )
                 ->run($maxKeepSeconds);
 
