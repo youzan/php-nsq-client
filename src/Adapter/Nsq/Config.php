@@ -111,7 +111,7 @@ class Config
      */
     public function cleanWhenSrvRetrying(SysException $e)
     {
-        $this->clearTopicCache();
+        //$this->clearTopicCache();
     }
 
     /**
@@ -122,7 +122,6 @@ class Config
     private function getTopicGroupConfig($topicParsed)
     {
         $groupName = $this->extractTopicGroup($topicParsed);
-
         if (isset($this->topicMapCaches[$groupName]))
         {
             $mapping = $this->topicMapCaches[$groupName];
