@@ -3,7 +3,7 @@
   "repositories": {"packagist": {"type": "composer", "url": "http://packagist.qima-inc.com"}},
   "config": { "secure-http": false },
   "require": {
-    "moolex/nsqphp": "~1.3.1",
+    "moolex/nsqphp": "~1.3.2",
     "kdt-lib/cache": "~1.0.0",
     "kdt-lib/config": "~1.0.0",
     "kdt-lib/tracing": "~1.0.0"

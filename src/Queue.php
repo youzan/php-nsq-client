@@ -163,6 +163,14 @@ class Queue
     }
 
     /**
+     * send a nop command
+     */
+    public static function ping()
+    {
+        self::nsq()->ping();
+    }
+
+    /**
      * @return Client
      */
     private static function nsq()
