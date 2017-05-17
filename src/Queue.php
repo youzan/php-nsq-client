@@ -160,6 +160,11 @@ class Queue
         self::nsq()->close();
     }
 
+    public static function ping()
+    {
+        self::nsq()->ping();
+    }
+
     /**
      * @return Client
      */

@@ -184,6 +184,11 @@ class Client implements AdapterInterface
         return $res;
     }
 
+    public function ping()
+    {
+        InstanceMgr::getSubInstance()->nop();
+    }
+
     /**
      * @param $topic
      * @param $result
