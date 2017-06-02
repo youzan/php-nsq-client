@@ -105,14 +105,15 @@ class Client implements AdapterInterface
                             $msg->getAttempts(),
                             $msg->getPayload()
                         ))
-                            ->setTraceID($msg->getTraceId())
+                        ->setTraceID($msg->getTraceId())
+                        ->setTag($msg->getTag())
                     ]);
                 },
                 $options['auto_delete'],
-                $options['sub_ordered']
-            )
-                ->run($maxKeepSeconds);
-
+                $options['sub_ordered'],
+                $options['msg_timeout'],
+                $options['tag']
+            )->run($maxKeepSeconds);
             return false;
 
         }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);

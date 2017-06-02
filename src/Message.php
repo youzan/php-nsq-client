@@ -50,6 +50,12 @@ class Message implements MessageInterface
     private $shardingProof = null;
 
     /**
+     * msg tag
+     * @var string
+     */
+    private $tag = null;
+
+    /**
      * @param $mix1
      * @param $timestamp
      * @param $attempts
@@ -133,6 +139,15 @@ class Message implements MessageInterface
     }
 
     /**
+     * msg tag
+     * @return string
+     */
+    public function getTag()
+    {
+        return $this->tag;
+    }
+
+    /**
      * @param $id
      * @return static
      * @throws InvalidParameterException
@@ -165,6 +180,16 @@ class Message implements MessageInterface
         {
             throw new InvalidParameterException('NSQ shardingProof must be an integer', 9986);
         }
+        return $this;
+    }
+
+    /**
+     * @param $tag
+     * @return static
+     */
+    public function setTag($tag)
+    {
+        $this->tag = $tag;
         return $this;
     }
 }

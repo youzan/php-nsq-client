@@ -94,6 +94,9 @@ class Queue
         $options['retry_delay'] = isset($options['retry_delay']) ? $options['retry_delay'] : 5;
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
         $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
+        $options['msg_timeout'] = isset($options['msg_timeout']) ? intval($options['msg_timeout']) : null;
+        $options['tag'] = isset($options['tag']) ? trim($options['tag']) : null;
+        
         // pop
         return self::nsq()->pop
         (
@@ -156,6 +159,14 @@ class Queue
     public static function close()
     {
         self::nsq()->close();
+    }
+
+    /**
+     * send a nop command
+     */
+    public static function ping()
+    {
+        self::nsq()->ping();
     }
 
     /**
