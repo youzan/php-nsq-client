@@ -111,6 +111,7 @@ class Client implements AdapterInterface
                 },
                 $options['auto_delete'],
                 $options['sub_ordered'],
+                $options['msg_timeout'],
                 $options['tag']
             )->run($maxKeepSeconds);
             return false;
