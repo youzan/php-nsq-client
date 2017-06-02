@@ -39,9 +39,10 @@ class Client implements AdapterInterface
      */
     public function push($topic, $message, array $options = [])
     {
-        $result = HA::getInstance()->pubRetrying(function () use ($topic, $message) {
 
-            return InstanceMgr::getPubInstance($topic)->publish(
+        $result = HA::getInstance()->pubRetrying(function () use ($topic, $message) {
+            $inst = InstanceMgr::getPubInstance($topic);
+            return $inst->publish(
                 $this->config->parseTopicName($topic),
                 MsgFilter::getInstance()->getMsgObject($topic, $message)
             );

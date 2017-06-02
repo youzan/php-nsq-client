@@ -162,11 +162,6 @@ class Queue
         self::nsq()->close();
     }
 
-    public static function ping()
-    {
-        self::nsq()->ping();
-    }
-
     /**
      * send a nop command
      */

@@ -134,7 +134,6 @@ class InstanceMgr
         self::initHASupport();
 
         $topicConfig = self::getConfig()->getTopicConfig($topic);
-
         return self::touchLookupdInstance(self::getStreamingPipe($topic), $topicConfig, $scene);
     }
 
@@ -223,10 +222,8 @@ class InstanceMgr
     private static function touchLookupdInstance($pipe, $config, $scene = 'mix')
     {
         $scope = $config['scope'];
-
         // make lookupd instance isolated because DCC will take dynamic results
         $isolated = $config['name'];
-
         if (isset(self::$lookupInstances[$pipe][$scope][$isolated][$scene]))
         {
             $splitter = self::$lookupInstances[$pipe][$scope][$isolated][$scene];
