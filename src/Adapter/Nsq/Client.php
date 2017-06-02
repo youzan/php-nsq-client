@@ -105,15 +105,14 @@ class Client implements AdapterInterface
                             $msg->getAttempts(),
                             $msg->getPayload()
                         ))
-                            ->setTraceID($msg->getTraceId())
+                        ->setTraceID($msg->getTraceId())
+                        ->setTag($msg->getTag())
                     ]);
                 },
                 $options['auto_delete'],
                 $options['sub_ordered'],
-                $options['msg_timeout']
-            )
-                ->run($maxKeepSeconds);
-
+                $options['tag']
+            )->run($maxKeepSeconds);
             return false;
 
         }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);
@@ -184,11 +183,6 @@ class Client implements AdapterInterface
         }
 
         return $res;
-    }
-
-    public function ping()
-    {
-        InstanceMgr::getSubInstance()->nop();
     }
 
     /**

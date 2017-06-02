@@ -98,6 +98,8 @@ class Queue
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
         $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
         $options['msg_timeout'] = isset($options['msg_timeout']) ? intval($options['msg_timeout']) : null;
+        $options['tag'] = isset($options['tag']) ? trim($options['tag']) : null;
+        
         // pop
         return self::nsq()->pop
         (

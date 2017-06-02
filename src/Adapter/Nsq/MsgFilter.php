@@ -82,7 +82,8 @@ class MsgFilter
         }
 
         $target = new NSQMessage($origin->getPayload());
-
+        $target->setTag($origin->getTag());
+        
         // flows
 
         // s1 - msg tracing
