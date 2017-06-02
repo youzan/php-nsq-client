@@ -10,6 +10,7 @@ namespace Kdt\Iron\Queue;
 
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
+use Kdt\Iron\Tracing\Sample\Scene\MQ;
 
 class Queue
 {
@@ -159,6 +160,11 @@ class Queue
     public static function close()
     {
         self::nsq()->close();
+    }
+
+    public static function ping()
+    {
+        self::nsq()->ping();
     }
 
     /**

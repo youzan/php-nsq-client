@@ -88,9 +88,7 @@ class Client implements AdapterInterface
         {
             $channel = 'default';
         }
-
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
-
         return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) {
 
             InstanceMgr::getSubInstance($topic)->subscribe(
@@ -184,6 +182,11 @@ class Client implements AdapterInterface
         }
 
         return $res;
+    }
+
+    public function ping()
+    {
+        InstanceMgr::getSubInstance()->nop();
     }
 
     /**
