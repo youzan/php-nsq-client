@@ -91,23 +91,22 @@ class Client implements AdapterInterface
 
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
 
-        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) {
-
+        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) 
+        {
             InstanceMgr::getSubInstance($topic)->subscribe(
                 Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']),
                 $this->config->parseTopicName($topic), $channel,
                 function (NsqMessage $msg) use ($callback)
                 {
-                    call_user_func_array($callback, [
-                        (new Message(
+                    $m = (new Message(
                             $msg->getId(),
                             $msg->getTimestamp(),
                             $msg->getAttempts(),
                             $msg->getPayload()
                         ))
                         ->setTraceID($msg->getTraceId())
-                        ->setTag($msg->getTag())
-                    ]);
+                        ->setTag($msg->getTag());
+                    call_user_func($callback, $m);
                 },
                 $options['auto_delete'],
                 $options['sub_ordered'],
@@ -115,7 +114,6 @@ class Client implements AdapterInterface
                 $options['tag']
             )->run($maxKeepSeconds);
             return false;
-
         }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);
     }
 

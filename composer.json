@@ -3,7 +3,7 @@
   "repositories": {"packagist": {"type": "composer", "url": "http://packagist.qima-inc.com"}},
   "config": { "secure-http": false },
   "require": {
-    "moolex/nsqphp": "~1.4",
+    "react/react": ">=0.2.1",
     "kdt-lib/cache": "~1.0.0",
     "kdt-lib/config": "~1.0.0",
     "kdt-lib/tracing": "~1.0.0"
@@ -14,6 +14,9 @@
   "autoload": {
     "psr-4": {
       "Kdt\\Iron\\Queue\\": "src"
+    },
+    "psr-0": {
+      "nsqphp": "src/Adapter/nsqphp/src"
     }
   },
   "autoload-dev": {
