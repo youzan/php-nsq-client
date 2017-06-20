@@ -2,7 +2,7 @@
   "name": "youzan/nsq-client",
   "config":{  },
   "require": {
-    "moolex/nsqphp": "~1.4.1"
+    "react/react": ">=0.2.1"
   },
   "require-dev": {
     "phpunit/phpunit": "5.2.9"
@@ -10,6 +10,9 @@
   "autoload": {
     "psr-4": {
       "Kdt\\Iron\\Queue\\": "src"
+    },
+    "psr-0": {
+      "nsqphp": "src/Adapter/nsqphp/src"
     }
   },
   "autoload-dev": {
