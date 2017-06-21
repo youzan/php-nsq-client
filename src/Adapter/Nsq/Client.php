@@ -90,12 +90,7 @@ class Client implements AdapterInterface
             $channel = 'default';
         }
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
-        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) {
-
-            InstanceMgr::getSubInstance($topic)->subscribe(
-                Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']),
-                $this->config->parseTopicName($topic), $channel,
-                function (NsqMessage $msg) use ($callback)
+        $msgCb = function (NsqMessage $msg) use ($callback)
                 {
                     call_user_func_array($callback, [
                         (new Message(
@@ -107,7 +102,19 @@ class Client implements AdapterInterface
                         ->setTraceID($msg->getTraceId())
                         ->setTag($msg->getTag())
                     ]);
-                },
+                };
+        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $msgCb, $options) {
+            $lookupResult = Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']);
+            $meta = current($lookupResult)['meta'];
+            if (!$meta['extend_support']) {
+                $options['tag'] = null;
+            }
+            $realTopic = $this->config->parseTopicName($topic);
+            InstanceMgr::getSubInstance($topic)->subscribe(
+                $lookupResult,
+                $realTopic,
+                $channel,
+                $msgCb,
                 $options['auto_delete'],
                 $options['sub_ordered'],
                 $options['msg_timeout'],
