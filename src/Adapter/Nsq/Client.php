@@ -39,13 +39,13 @@ class Client implements AdapterInterface
      */
     public function push($topic, $message, array $options = [])
     {
+        
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $message) {
-
-            return InstanceMgr::getPubInstance($topic)->publish(
+            $inst = InstanceMgr::getPubInstance($topic);
+            return $inst->publish(
                 $this->config->parseTopicName($topic),
                 MsgFilter::getInstance()->getMsgObject($topic, $message)
             );
-
         }, $topic, $options['max_retry'], $options['retry_delay_ms']);
 
         return $this->makePubResult($topic, $result);
@@ -90,24 +90,31 @@ class Client implements AdapterInterface
         }
 
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
-
-        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $callback, $options) 
+        $msgCallback = function (NsqMessage $msg) use ($callback)
+                        {
+                            $m = (new Message(
+                                    $msg->getId(),
+                                    $msg->getTimestamp(),
+                                    $msg->getAttempts(),
+                                    $msg->getPayload()
+                                ))
+                                ->setTraceID($msg->getTraceId())
+                                ->setTag($msg->getTag());
+                            call_user_func($callback, $m);
+                        };
+        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $msgCallback, $options) 
         {
+            $lookupResult = Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']);
+            $meta = current($lookupResult)['meta'];
+            if (!$meta['extend_support']) {
+                $options['tag'] = null;
+            }
+            $realTopic = $this->config->parseTopicName($topic);
             InstanceMgr::getSubInstance($topic)->subscribe(
-                Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']),
-                $this->config->parseTopicName($topic), $channel,
-                function (NsqMessage $msg) use ($callback)
-                {
-                    $m = (new Message(
-                            $msg->getId(),
-                            $msg->getTimestamp(),
-                            $msg->getAttempts(),
-                            $msg->getPayload()
-                        ))
-                        ->setTraceID($msg->getTraceId())
-                        ->setTag($msg->getTag());
-                    call_user_func($callback, $m);
-                },
+                $lookupResult,
+                $realTopic,
+                $channel,
+                $msgCallback,
                 $options['auto_delete'],
                 $options['sub_ordered'],
                 $options['msg_timeout'],
