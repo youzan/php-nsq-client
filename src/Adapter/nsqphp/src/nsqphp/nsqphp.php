@@ -803,6 +803,7 @@ class nsqphp
                             $this->logger->error(sprintf('Received a message[%s] which tag not match: "%s" != "%s"', 
                                 $msg->getId(), $msg->getTag(), $desiredTag));
                         }
+                        return;
                     }
                 }
                 $this->pendingMessages[$msg->getId()] = ['connection' => $connection, 'raw_id' => $msg->getRawId()];
