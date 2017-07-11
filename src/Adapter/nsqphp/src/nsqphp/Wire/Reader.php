@@ -142,15 +142,18 @@ class Reader
                     if ($connection->getHasExtendData()) 
                     {
                         $extVer = ord($this->readBinary($connection, 1));
-                        switch ($extVer)
+                        $dataOffset+= 1;
+                        if ($extVer > 0)
                         {
-                        case 2:
                             $extSize = $this->readShort($connection);
-                            $dataOffset+= 3 + $extSize;
-                            $frame['tag'] = $this->readString($connection, $extSize);
-                            break;
-                        default:
-                            throw new ProtocolException('Unsupported ext version: '.$extVer); 
+                            $dataOffset+= 2 + $extSize;
+                            $extData = $this->readString($connection, $extSize);
+                            switch ($extVer)
+                            {
+                            case 2:
+                               $frame['tag'] = $extData;
+                               break;
+                            }
                         }
                     }
                     // payload offset for ext-info in ordered subscribe
