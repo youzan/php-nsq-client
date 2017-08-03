@@ -370,6 +370,8 @@ class Reader
      */
     private function readString(ConnectionInterface $connection, $size)
     {
+        return $connection->read($size);
+        /*
         $temp = @unpack("c{$size}chars", $connection->read($size));
         if (is_array($temp))
         {
@@ -384,6 +386,6 @@ class Reader
         else
         {
             return null;
-        }
+        }*/
     }
 }
