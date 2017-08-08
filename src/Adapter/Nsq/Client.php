@@ -115,7 +115,7 @@ class Client implements AdapterInterface
                 $lookupResult,
                 $realTopic,
                 $channel,
-                $msgCallback,
+                $msgCb,
                 $options['auto_delete'],
                 $options['sub_ordered'],
                 $options['msg_timeout'],
