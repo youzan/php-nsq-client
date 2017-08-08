@@ -97,33 +97,6 @@ class Writer
         return $cmd . $size . $data;
      }
 
-    public function publish($topic, $messageBag, $partitionID = null, $traceID = null)
-    {
-        // the fast pack way, but may be unsafe
-        // $cmd = $this->command('PUB', $topic);
-        // $size = pack('N', strlen($message));
-        // return $cmd . $size . $message;
-        
-        // the safe way, but is time cost
-        $payload = $messageBag->getPayload();
-        $api = $traceID ? 'PUB_TRACE' : 'PUB';
-        $cmdArgs = [$api, $topic];
-        if (is_numeric($partitionID))
-        {
-            array_push($cmdArgs, $partitionID);
-        }
-        $tag = $messageBag->getTag();
-        if (!empty($tag))
-        {
-            array_push($cmdArgs, $tag);
-        }
-        $cmd = call_user_func_array([$this, 'command'], $cmdArgs);
-        $data = ($traceID ? $this->packLong($traceID) : '') . $this->packString($payload);
-        $size = pack('N', strlen($data));
-
-        return $cmd . $size . $data;
-    }
-
     /**
      * Publish [PUB] via HTTP
      * @param string $topic
