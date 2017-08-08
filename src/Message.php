@@ -56,6 +56,12 @@ class Message implements MessageInterface
     private $tag = null;
 
     /**
+     * msg extends
+     * @var array
+     */
+    private $extends = [];
+
+    /**
      * @param $mix1
      * @param $timestamp
      * @param $attempts
@@ -192,4 +198,11 @@ class Message implements MessageInterface
         $this->tag = $tag;
         return $this;
     }
+
+    public function setExtends($k, $v)
+    {
+        $this->extends[$k] = $v;
+        return $this;
+    }
 }
+

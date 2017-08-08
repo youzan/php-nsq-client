@@ -80,28 +80,18 @@ class Writer
      * 
      * @return string
      */
-    public function publish($topic, $messageBag, $partitionID = null, $traceID = null)
+    public function publish($topic, $messageBag, $partitionID = null)
     {
-        // the fast pack way, but may be unsafe
-        // $cmd = $this->command('PUB', $topic);
-        // $size = pack('N', strlen($message));
-        // return $cmd . $size . $message;
-        
-        // the safe way, but is time cost
         $payload = $messageBag->getPayload();
-        $api = $traceID ? 'PUB_TRACE' : 'PUB';
+        $extends = $messageBag->getExtends();
+        $api = empty($extends) ? 'PUB' : 'PUB_EXT';
         $cmdArgs = [$api, $topic];
-        if (is_numeric($partitionID))
-        {
-            array_push($cmdArgs, $partitionID);
+        $cmd = $this->command($api, $topic, $partitionID);
+        $data = $this->packString($payload);
+        if (!empty($extends)) {
+            $extStr = json_encode(array_map('strval', $extends));
+            $data = pack('n', strlen($extStr)) . $extStr . $data;
         }
-        $tag = $messageBag->getTag();
-        if (!empty($tag))
-        {
-            array_push($cmdArgs, $tag);
-        }
-        $cmd = call_user_func_array([$this, 'command'], $cmdArgs);
-        $data = ($traceID ? $this->packLong($traceID) : '') . $this->packString($payload);
         $size = pack('N', strlen($data));
 
         return $cmd . $size . $data;
@@ -120,9 +110,9 @@ class Writer
         $api = $traceID ? ('/pubtrace?trace_id='.$traceID.'&') : '/pub?';
 
         $api .= 'topic='.rawurlencode($topic);
-        $tag = $message->getTag();
+        $ext = json_encode($message->getExtends());
         if (!empty($tag)) {
-            $api .= 'tag='.rawurlencode($tag);
+            $api .= 'ext='.rawurlencode($tag);
         }
         is_numeric($partitionID) && $api .= '&partition='.$partitionID;
         $payload = $messageBag->getPayload();

@@ -463,10 +463,9 @@ class nsqphp
     {
         $success = 0;
         $errors = [];
-
         if ($messageBag instanceof MessageInterface)
         {
-            $mBody = $this->writer->publish($topic, $messageBag, $conn->getPartitionID(), $conn->isYzCluster() ? $messageBag->getTraceId() : null);
+            $mBody = $this->writer->publish($topic, $messageBag, $conn->getPartitionID());
             $this->checkPubMsgSize(strlen($mBody), $topic);
         }
         else
@@ -522,7 +521,7 @@ class nsqphp
 
         if ($messageBag instanceof MessageInterface)
         {
-            list($url, $data) = $this->writer->publishForHttp($topic, $messageBag, $conn->getPartitionID(), $conn->isYzCluster() ? $messageBag->getTraceId() : null);
+            list($url, $data) = $this->writer->publishForHttp($topic, $messageBag, $conn->getPartitionID());
             $this->checkPubMsgSize(strlen($data), $topic);
         }
         else
@@ -789,7 +788,6 @@ class nsqphp
             $connection->write($this->writer->nop());
         } elseif ($this->reader->frameIsMessage($frame)) {
             $msg = Message::fromFrame($frame);
-            
             if ($this->dedupe !== NULL && $this->dedupe->containsAndAdd($topic, $channel, $msg)) {
                 if ($this->logger) {
                     $this->logger->debug(sprintf('Deduplicating [%s] "%s"', (string)$connection, $msg->getId()));

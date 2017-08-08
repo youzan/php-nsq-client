@@ -153,6 +153,9 @@ class Reader
                             case 2:
                                $frame['tag'] = $extData;
                                break;
+                            case 4:
+                               $frame['extends'] = json_decode($extData, true); 
+                               break;
                             }
                         }
                     }
@@ -371,21 +374,5 @@ class Reader
     private function readString(ConnectionInterface $connection, $size)
     {
         return $connection->read($size);
-        /*
-        $temp = @unpack("c{$size}chars", $connection->read($size));
-        if (is_array($temp))
-        {
-            $out = "";
-            foreach($temp as $v) {
-                if ($v > 0) {
-                    $out .= chr($v);
-                }
-            }
-            return $out;
-        }
-        else
-        {
-            return null;
-        }*/
     }
 }

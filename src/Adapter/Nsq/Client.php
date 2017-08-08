@@ -90,18 +90,17 @@ class Client implements AdapterInterface
             $channel = 'default';
         }
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
-        $msgCb = function (NsqMessage $msg) use ($callback)
+        $msgCb = function (NsqMessage $m) use ($callback)
                 {
-                    call_user_func_array($callback, [
-                        (new Message(
-                            $msg->getId(),
-                            $msg->getTimestamp(),
-                            $msg->getAttempts(),
-                            $msg->getPayload()
+                    $msg = (new Message(
+                            $m->getId(),
+                            $m->getTimestamp(),
+                            $m->getAttempts(),
+                            $m->getPayload()
                         ))
-                        ->setTraceID($msg->getTraceId())
-                        ->setTag($msg->getTag())
-                    ]);
+                        ->setTraceID(intval($m->getTraceId()))
+                        ->setTag($m->getTag());
+                    $callback($msg);
                 };
         return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $msgCb, $options) {
             $lookupResult = Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']);

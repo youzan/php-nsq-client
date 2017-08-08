@@ -24,15 +24,15 @@ class Message implements MessageInterface
         {
             $ret->setTag($frame['tag']);
         }
+        if (isset($frame['extends']))
+        {
+            $ret->setExtends($frame['extends']);
+        }
         return $ret;
     }
     
-    /**
-     * Message tag
-     * @var string|NULL
-     */
-    private $tag = NULL;
-    
+    private $extends = [];
+ 
     /**
      * Message payload - string
      * 
@@ -139,7 +139,14 @@ class Message implements MessageInterface
      */
     public function getTraceId()
     {
-        return $this->trace_id;
+        $ret = $this->trace_id;
+        if (!empty($ret)) {
+            return $ret;
+        }
+        if (isset($this->extends['##trace_id']))
+        {
+            return $this->extends['##trace_id'];
+        }
     }
 
     /**
@@ -175,6 +182,7 @@ class Message implements MessageInterface
      */
     public function setTraceId($id)
     {
+        $this->extends['##trace_id'] = $id;
         $this->trace_id = $id;
     }
 
@@ -191,7 +199,7 @@ class Message implements MessageInterface
      */
     public function setTag($tag) 
     {
-        $this->tag = $tag;
+        $this->extends['##client_dispatch_tag'] = $tag;
     }
     
     /**
@@ -199,6 +207,20 @@ class Message implements MessageInterface
      */
     public function getTag()
     {
-        return $this->tag;
+        if (isset($this->extends['##client_dispatch_tag'])) {
+            return $this->extends['##client_dispatch_tag'];
+        }
+        return null;
+    }
+
+    public function setExtends($extends)
+    {
+        $this->extends = $extends;
+    }
+
+    public function getExtends()
+    {
+        return $this->extends;
     }
 }
+
