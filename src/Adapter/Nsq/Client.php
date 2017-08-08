@@ -90,19 +90,20 @@ class Client implements AdapterInterface
         }
 
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
-        $msgCallback = function (NsqMessage $msg) use ($callback)
-                        {
-                            $m = (new Message(
-                                    $msg->getId(),
-                                    $msg->getTimestamp(),
-                                    $msg->getAttempts(),
-                                    $msg->getPayload()
-                                ))
-                                ->setTraceID($msg->getTraceId())
-                                ->setTag($msg->getTag());
-                            call_user_func($callback, $m);
-                        };
-        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $msgCallback, $options) 
+        $msgCb = function (NsqMessage $m) use ($callback)
+                {
+                    $msg = (new Message(
+                            $m->getId(),
+                            $m->getTimestamp(),
+                            $m->getAttempts(),
+                            $m->getPayload()
+                        ))
+                        ->setTraceID(intval($m->getTraceId()))
+                        ->setTag($m->getTag());
+                    $callback($msg);
+                };
+
+        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $msgCb, $options) 
         {
             $lookupResult = Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']);
             $meta = current($lookupResult)['meta'];

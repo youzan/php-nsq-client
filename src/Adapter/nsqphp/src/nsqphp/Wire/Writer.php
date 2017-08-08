@@ -80,6 +80,23 @@ class Writer
      * 
      * @return string
      */
+    public function publish($topic, $messageBag, $partitionID = null)
+    {
+        $payload = $messageBag->getPayload();
+        $extends = $messageBag->getExtends();
+        $api = empty($extends) ? 'PUB' : 'PUB_EXT';
+        $cmdArgs = [$api, $topic];
+        $cmd = $this->command($api, $topic, $partitionID);
+        $data = $this->packString($payload);
+        if (!empty($extends)) {
+            $extStr = json_encode(array_map('strval', $extends));
+            $data = pack('n', strlen($extStr)) . $extStr . $data;
+        }
+        $size = pack('N', strlen($data));
+ 
+        return $cmd . $size . $data;
+     }
+
     public function publish($topic, $messageBag, $partitionID = null, $traceID = null)
     {
         // the fast pack way, but may be unsafe
@@ -120,9 +137,9 @@ class Writer
         $api = $traceID ? ('/pubtrace?trace_id='.$traceID.'&') : '/pub?';
 
         $api .= 'topic='.rawurlencode($topic);
-        $tag = $message->getTag();
+        $ext = json_encode($message->getExtends());
         if (!empty($tag)) {
-            $api .= 'tag='.rawurlencode($tag);
+            $api .= 'ext='.rawurlencode($tag);
         }
         is_numeric($partitionID) && $api .= '&partition='.$partitionID;
         $payload = $message->getPayload();
