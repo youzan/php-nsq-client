@@ -370,20 +370,6 @@ class Reader
      */
     private function readString(ConnectionInterface $connection, $size)
     {
-        $temp = @unpack("c{$size}chars", $connection->read($size));
-        if (is_array($temp))
-        {
-            $out = "";
-            foreach($temp as $v) {
-                if ($v > 0) {
-                    $out .= chr($v);
-                }
-            }
-            return $out;
-        }
-        else
-        {
-            return null;
-        }
+        return $connection->read($size);
     }
 }
