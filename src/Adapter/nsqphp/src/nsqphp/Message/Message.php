@@ -182,7 +182,11 @@ class Message implements MessageInterface
      */
     public function setTraceId($id)
     {
-        $this->extends['##trace_id'] = $id;
+        if (empty($id)) {
+            unset($this->extends['##trace_id']);
+        } else {
+            $this->extends['##trace_id'] = $id;
+        }
         $this->trace_id = $id;
     }
 
@@ -199,7 +203,11 @@ class Message implements MessageInterface
      */
     public function setTag($tag) 
     {
-        $this->extends['##client_dispatch_tag'] = $tag;
+        if (empty($tag)) {
+            unset($this->extends['##client_dispatch_tag']);
+        } else {
+            $this->extends['##client_dispatch_tag'] = $tag;
+        }
     }
     
     /**
