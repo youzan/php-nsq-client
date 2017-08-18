@@ -704,15 +704,20 @@ class nsqphp
             $identifyData = [
                 'client_id' => (string)getmypid(), 
                 'hostname' => gethostname(), 
-                'user_agent' => sprintf('php-client/%s', self::VERSION)
+                'user_agent' => sprintf('php-client/%s', self::VERSION),
             ];
             if ($msgTimeout > 0)
             {
                 $identifyData['msg_timeout'] = intval($msgTimeout); 
             }
-            if (!empty($tag))
-            {
-                $identifyData['desired_tag'] = trim($tag);
+            if ($conn->getHasExtendData()) {
+                $identifyData['extend_support'] = true;
+                if (!empty($tag))
+                {
+                    $identifyData['desired_tag'] = trim($tag);
+                }
+            } else {
+                $identifyData['extend_support'] = false;
             }
             $conn->write($this->writer->identify($identifyData));
 
