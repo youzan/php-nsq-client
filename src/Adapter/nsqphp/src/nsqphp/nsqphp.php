@@ -705,7 +705,8 @@ class nsqphp
             $identifyData = [
                 'client_id' => (string)getmypid(), 
                 'hostname' => gethostname(), 
-                'user_agent' => sprintf('php-client/%s', self::VERSION)
+                'user_agent' => sprintf('php-client/%s', self::VERSION),
+                'extend_support' => true
             ];
             if ($msgTimeout > 0)
             {
