@@ -706,10 +706,7 @@ class nsqphp
                 'hostname' => gethostname(), 
                 'user_agent' => sprintf('php-client/%s', self::VERSION),
             ];
-            if ($msgTimeout > 0)
-            {
-                $identifyData['msg_timeout'] = intval($msgTimeout); 
-            }
+            $identifyData['msg_timeout'] = intval($msgTimeout); 
             if ($conn->getHasExtendData())
             {
                 if (!empty($tag))

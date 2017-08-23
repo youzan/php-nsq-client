@@ -107,7 +107,7 @@ class Client implements AdapterInterface
         {
             $lookupResult = Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']);
             $meta = current($lookupResult)['meta'];
-            if (!$meta['extend_support']) {
+            if (!isset($meta['extend_support']) || !$meta['extend_support']) {
                 $options['tag'] = null;
             }
             $realTopic = $this->config->parseTopicName($topic);
