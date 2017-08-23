@@ -26,7 +26,7 @@ class nsqphp
     /**
      * VERSION
      */
-    const VERSION = '1.3.0';
+    const VERSION = '1.4.0';
 
     /**
      * Publish "consistency levels" [ish]
@@ -704,7 +704,7 @@ class nsqphp
             $identifyData = [
                 'client_id' => (string)getmypid(), 
                 'hostname' => gethostname(), 
-                'user_agent' => sprintf('php-client/%s', self::VERSION),
+                'user_agent' => sprintf('php-iron/%s', self::VERSION),
             ];
             $identifyData['msg_timeout'] = intval($msgTimeout); 
             if ($conn->getHasExtendData())
