@@ -11,6 +11,7 @@ namespace Kdt\Iron\Queue;
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
 use Kdt\Iron\Tracing\Sample\Scene\MQ;
+use ZanPHP\Component\ServiceChain\ServiceChain;
 
 class Queue
 {
@@ -32,12 +33,17 @@ class Queue
     /**
      * queue msg publish
      * @param $topic
-     * @param $message
+     * @param Message $message
      * @param $options
      * @return bool
      */
     public static function push($topic, $message, array $options = [])
     {
+        $serviceChainName = ServiceChain::get(true);
+        if ($serviceChainName !== null) {
+            $message->setTag(strval($serviceChainName));
+        }
+
         // options
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
         $options['retry_delay_ms'] = isset($options['retry_delay_ms']) ? $options['retry_delay_ms'] : 10;
@@ -59,12 +65,19 @@ class Queue
     /**
      * queue msg publish (bulk)
      * @param $topic
-     * @param $messages
+     * @param Message[] $messages
      * @param $options
      * @return bool
      */
     public static function bulkPush($topic, array $messages, array $options = [])
     {
+        $serviceChainName = ServiceChain::get(true);
+        if ($serviceChainName !== null) {
+            foreach ($messages as $message) {
+                $message->setTag(strval($serviceChainName));
+            }
+        }
+
         // options
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
         $options['retry_delay_ms'] = isset($options['retry_delay_ms']) ? $options['retry_delay_ms'] : 10;
@@ -98,7 +111,13 @@ class Queue
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
         $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
         $options['msg_timeout'] = isset($options['msg_timeout']) ? intval($options['msg_timeout']) : null;
-        $options['tag'] = isset($options['tag']) ? trim($options['tag']) : null;
+
+        $serviceChainName = ServiceChain::get(true);
+        if ($serviceChainName !== null) {
+            $options['tag'] = strval($serviceChainName);
+        } else {
+            $options['tag'] = isset($options['tag']) ? trim($options['tag']) : null;
+        }
         
         // pop
         return self::nsq()->pop
