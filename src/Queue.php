@@ -33,16 +33,13 @@ class Queue
     /**
      * queue msg publish
      * @param $topic
-     * @param Message $message
+     * @param Message|Message[] $message
      * @param $options
      * @return bool
      */
     public static function push($topic, $message, array $options = [])
     {
-        $serviceChainName = ServiceChain::get(true);
-        if ($serviceChainName !== null) {
-            $message->setTag(strval($serviceChainName));
-        }
+        self::setServiceChainName($message);
 
         // options
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
@@ -71,12 +68,7 @@ class Queue
      */
     public static function bulkPush($topic, array $messages, array $options = [])
     {
-        $serviceChainName = ServiceChain::get(true);
-        if ($serviceChainName !== null) {
-            foreach ($messages as $message) {
-                $message->setTag(strval($serviceChainName));
-            }
-        }
+        self::setServiceChainName($messages);
 
         // options
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
@@ -217,5 +209,17 @@ class Queue
         $random = mt_rand(0, intval($custom * self::$ksRandPercent));
         // merge
         return $custom + $random;
+    }
+
+    private static function setServiceChainName($messages)
+    {
+        $serviceChainName = ServiceChain::get(true);
+        if ($serviceChainName !== null) {
+            foreach ((array)$messages as $message) {
+                if ($message instanceof  Message) {
+                    $message->setTag(strval($serviceChainName));
+                }
+            }
+        }
     }
 }
