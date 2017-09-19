@@ -7,7 +7,7 @@
     "kdt-lib/cache": "~1.0.0",
     "kdt-lib/config": "~1.0.0",
     "kdt-lib/tracing": "~1.0.0",
-    "zanphp/service-chain": "1.0.1"
+    "zanphp/service-chain": "1.0.0"
   },
   "require-dev": {
     "phpunit/phpunit": "5.2.9"
