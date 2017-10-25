@@ -481,7 +481,7 @@ class nsqphp
                 }
             }
             $this->checkPubMsgNums(count($messages), $topic);
-            $mBody = $this->writer->multiPublish($topic, $messages);
+            $mBody = $this->writer->multiPublish($topic, $messages, $conn->getPartitionID());
         }
 
         $conn->write($mBody);
@@ -706,7 +706,11 @@ class nsqphp
                 'hostname' => gethostname(), 
                 'user_agent' => sprintf('php-iron/%s', self::VERSION),
             ];
-            $identifyData['msg_timeout'] = intval($msgTimeout); 
+            $msgTimeout = intval($msgTimeout);
+            if ($msgTimeout > 0)
+            {
+                $identifyData['msg_timeout'] = $msgTimeout;
+            }
             if ($conn->getHasExtendData())
             {
                 if (!empty($tag))

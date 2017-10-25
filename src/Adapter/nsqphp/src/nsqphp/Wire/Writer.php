@@ -131,9 +131,9 @@ class Writer
      *
      * @return string
      */
-    public function multiPublish($topic, $messages)
+    public function multiPublish($topic, $messages, $partitionID = null)
     {
-        $cmd = $this->command('MPUB', $topic);
+        $cmd = $this->command('MPUB', $topic, $partitionID);
 
         $msgNum = pack('N', count($messages));
 
