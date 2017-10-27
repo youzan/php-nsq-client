@@ -69,7 +69,7 @@ class Message implements MessageInterface
      *
      * @throws InvalidParameterException
      */
-    public function __construct($mix1, $timestamp = null, $attempts = null, $payload = null)
+    public function __construct($mix1, $timestamp = null, $attempts = null, $payload = null, $extends = [])
     {
         $argsCount = func_num_args();
 
@@ -87,6 +87,7 @@ class Message implements MessageInterface
             $this->timestamp = (int)substr($timestamp, 0, 10);
             $this->attempts = (int)$attempts;
             $this->payload = json_decode($payload, true);
+            $this->extends = $extends;
         }
     }
 

@@ -66,6 +66,7 @@ class Client implements AdapterInterface
         return $this->makePubResult($topic, $result);
     }
 
+
     /**
      * @param $topic
      * @param callable $callback
@@ -91,7 +92,8 @@ class Client implements AdapterInterface
                             $m->getId(),
                             $m->getTimestamp(),
                             $m->getAttempts(),
-                            $m->getPayload()
+                            $m->getPayload(),
+                            $m->getExtends()
                         ))
                         ->setTraceID(intval($m->getTraceId()))
                         ->setTag($m->getTag());
