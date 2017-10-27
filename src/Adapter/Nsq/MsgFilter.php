@@ -94,7 +94,7 @@ class MsgFilter
         $zanTest = $serviceChain['zan_test'] ?: false;
         if ($zanTest !== false) {
             $ext = $target->getExtends();
-            $ext['zan_test'] = 'true';
+            $ext['zan_test'] = true;
             $target->setExtends($ext);
         }
 
