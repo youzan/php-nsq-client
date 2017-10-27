@@ -113,9 +113,8 @@ class Queue
             $topic,
             function (MessageInterface $msg) use ($callback)
             {
-                $ext = $msg->getExtends();
-                $zanTest = isset($ext['zan_test']) && $ext['zan_test'] !== 'false';
-                if ($zanTest) {
+                $zanTest = $msg->getExtends('zan_test');
+                if ($zanTest && $ext['zan_test'] !== 'false') {
                     $serviceChain = ServiceChain::getAll();
                     $serviceChain['zan_test'] = true;
                     ServiceChain::setAll($serviceChain);

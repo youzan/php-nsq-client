@@ -1,7 +1,7 @@
 <?php
 namespace Kdt\Iron\Queue\Adapter\Nsq;
 
-class ServiceChain extends ZanPHP\Component\ServiceChain {
+class ServiceChain extends \ZanPHP\Component\ServiceChain\ServiceChain {
     public static function getAll()
     {
         $json = static::get(false);
