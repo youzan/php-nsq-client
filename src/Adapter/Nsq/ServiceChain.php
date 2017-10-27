@@ -1,5 +1,5 @@
 <?php
-namespace Kdt\Iron\Queue;
+namespace Kdt\Iron\Queue\Adapter\Nsq;
 
 class ServiceChain extends ZanPHP\Component\ServiceChain {
     public static function getAll()
