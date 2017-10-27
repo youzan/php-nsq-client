@@ -470,18 +470,29 @@ class nsqphp
         }
         else
         {
-            $messages = [];
+            // 不再使用 mpub，因为 mpub 不支持扩展字段，无法支持service chain
             foreach ($messageBag as $messageItem)
             {
-                if ($messageItem instanceof MessageInterface)
-                {
-                    $cBody = $messageItem->getPayload();
-                    $this->checkPubMsgSize(strlen($cBody), $topic);
-                    $messages[] = $cBody;
-                }
+                $result = $this->publishViaTcp($conn, $topic, $messageItem);
+                $success+= $result[0];
+                $errors = array_merge($errors, $result[1]);
             }
-            $this->checkPubMsgNums(count($messages), $topic);
-            $mBody = $this->writer->multiPublish($topic, $messages, $conn->getPartitionID());
+            return [
+                $success,
+                $errors
+            ];
+            // $messages = [];
+            // foreach ($messageBag as $messageItem)
+            // {
+            //     if ($messageItem instanceof MessageInterface)
+            //     {
+            //         $cBody = $messageItem->getPayload();
+            //         $this->checkPubMsgSize(strlen($cBody), $topic);
+            //         $messages[] = $cBody;
+            //     }
+            // }
+            // $this->checkPubMsgNums(count($messages), $topic);
+            // $mBody = $this->writer->multiPublish($topic, $messages, $conn->getPartitionID());
         }
 
         $conn->write($mBody);

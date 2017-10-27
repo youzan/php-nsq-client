@@ -16,9 +16,6 @@ use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 use Kdt\Iron\Queue\Message as QMessage;
 use nsqphp\Message\Message as NSQMessage;
 
-use ZanPHP\Component\ServiceChain\ServiceChain;
-
-
 class MsgFilter
 {
     use SingleInstance;
@@ -85,14 +82,21 @@ class MsgFilter
         }
 
         $target = new NSQMessage($origin->getPayload());
-
-        $serviceChainName = ServiceChain::get(true);
+        
+        // for publish with service chain
+        $serviceChain = ServiceChain::getAll();
+        $serviceChainName = $serviceChain['name'] ?: null;
         if ($serviceChainName === null) {
             $target->setTag($origin->getTag());
         } else {
             $target->setTag(strval($serviceChainName));
         }
-
+        $zanTest = $serviceChain['zan_test'] ?: false;
+        if ($zanTest !== false) {
+            $ext = $target->getExtends();
+            $ext['zan_test'] = 'true';
+            $target->setExtends($ext);
+        }
 
         // flows
 

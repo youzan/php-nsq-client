@@ -11,7 +11,6 @@ namespace Kdt\Iron\Queue;
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
 use Kdt\Iron\Tracing\Sample\Scene\MQ;
-use ZanPHP\Component\ServiceChain\ServiceChain;
 
 class Queue
 {
@@ -113,6 +112,13 @@ class Queue
             $topic,
             function (MessageInterface $msg) use ($callback)
             {
+                $ext = $msg->getExtends();
+                $zanTest = isset($ext['zan_test']) && $ext['zan_test'] !== 'false';
+                if ($zanTest) {
+                    $serviceChain = ServiceChain::getAll();
+                    $serviceChain['zan_test'] = true;
+                    ServiceChain::setAll($serviceChain);
+                }
                 call_user_func_array($callback, [$msg]);
             },
             $options

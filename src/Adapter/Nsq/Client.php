@@ -42,10 +42,8 @@ class Client implements AdapterInterface
         
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $message) {
             $inst = InstanceMgr::getPubInstance($topic);
-            return $inst->publish(
-                $this->config->parseTopicName($topic),
-                MsgFilter::getInstance()->getMsgObject($topic, $message)
-            );
+            $msgObj = MsgFilter::getInstance()->getMsgObject($topic, $message);
+            return $inst->publish($this->config->parseTopicName($topic), $msgObj);
         }, $topic, $options['max_retry'], $options['retry_delay_ms']);
 
         return $this->makePubResult($topic, $result);
@@ -60,12 +58,9 @@ class Client implements AdapterInterface
     public function bulk($topic, array $messages, array $options = [])
     {
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $messages) {
-
-            return InstanceMgr::getPubInstance($topic)->publish(
-                $this->config->parseTopicName($topic),
-                MsgFilter::getInstance()->getMsgObjectBag($topic, $messages)
-            );
-
+            $inst = InstanceMgr::getPubInstance($topic);
+            $msgObj = MsgFilter::getInstance()->getMsgObjectBag($topic, $messages);
+            return $inst->publish($this->config->parseTopicName($topic), $msgObj);
         }, $topic, $options['max_retry'], $options['retry_delay_ms']);
 
         return $this->makePubResult($topic, $result);
