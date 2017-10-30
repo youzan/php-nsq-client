@@ -18,4 +18,14 @@ class ServiceChain extends \ZanPHP\Component\ServiceChain\ServiceChain {
             $_SERVER[$key] = $json;
         }
     }
+
+    public static function clear()
+    {
+        if (PHP_SAPI === 'cli') {
+            putenv(static::ENV_KEY.'='.null);
+        } else {
+            $key = "HTTP_" . strtoupper(str_replace('-', '_', static::HDR_KEY));
+            unset($_SERVER[$key]);
+        }
+    }
 }

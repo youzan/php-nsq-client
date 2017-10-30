@@ -121,7 +121,9 @@ class Queue
                 } else {
                     $serviceChain = ServiceChain::getAll();
                     unset($serviceChain['zan_test']);
-                    if (!empty($serviceChain)) {
+                    if (empty($serviceChain)) {
+                        ServiceChain::clear();
+                    } else {
                         ServiceChain::setAll($serviceChain);
                     }
                 }
