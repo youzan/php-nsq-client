@@ -632,24 +632,26 @@ class nsqphp
      *      parameter of the message object dequeued. Simply return TRUE to 
      *      mark the message as finished or throw an exception to cause a
      *      backed-off requeue
-     * @param bool $autoDelete // Is automatic delete message from queue (means set msg FIN and client RDY)
-     * @param bool $subOrdered // Is subscribe in ordered state
-     * @param int  $msgTimeout // Message timeout. null means use default
-     * @param string $tag // desired tag, can be null
+     * @param array $params
+     * bool auto_delete // Is automatic delete message from queue (means set msg FIN and client RDY)
+     * bool sub_ordered // Is subscribe in ordered state
+     * int  msg_timeout // Message timeout. null means use default
+     * string tag // desired tag, can be null
+     * array ext_filter
+     * 
      * @throws \RuntimeException If we don't have a valid callback
      * @throws \InvalidArgumentException If we don't have a valid callback
      * 
      * @return nsqphp This instance of call chaining
      */
-    public function subscribe($hosts, $topic, $channel, $callback, $autoDelete = true, $subOrdered = false, $msgTimeout = null, $tag = null)
+    public function subscribe($hosts, $topic, $channel, $callback, $params)
     {
-        /*
-        if (is_null($this->getNsLookup())) {
-            throw new \RuntimeException(
-                'nsqphp initialised without providing lookup service (required for sub).'
-            );
-        }
-        */
+        $autoDelete = isset($params['auto_delete']) ? boolval($params['auto_delete']) : true;
+        $subOrdered = isset($params['sub_ordered']) ? boolval($params['sub_ordered']) : false;
+        $msgTimeout = isset($params['msg_timeout']) ? intval($params['msg_timeout']) : null;
+        $tag = isset($params['tag']) ? strval($params['tag']) : null;
+        $extFilter = isset($params['ext_filter']) ? $params['ext_filter'] : null;
+        
         if (!is_callable($callback)) {
             throw new \InvalidArgumentException(
                 '"callback" invalid; expecting a PHP callable'
@@ -700,6 +702,10 @@ class nsqphp
                 {
                     $conn->setDesiredTag($tag);
                 }
+                if (!empty($extFilTer))
+                {
+                    $conn->setExtFilter($extFilter);
+                }
             }
             // looping
             $this->initLoop()->addReadStream
@@ -724,11 +730,15 @@ class nsqphp
             }
             if ($conn->getHasExtendData())
             {
+                $identifyData['extend_support'] = true;
                 if (!empty($tag))
                 {
                     $identifyData['desired_tag'] = trim($tag);
                 }
-                $identifyData['extend_support'] = true;
+                if (!empty($extFilter))
+                {
+                    $identifyData['ext_filter'] = $extFilter;
+                }
             }
             else
             {
@@ -826,8 +836,11 @@ class nsqphp
                     }
                 }
                 $this->pendingMessages[$msg->getId()] = ['connection' => $connection, 'raw_id' => $msg->getRawId()];
+                $filtered = $this->isFiltered($msg, $connection);
                 try {
-                    call_user_func($callback, $msg);
+                    if (!$filtered) {
+                        call_user_func($callback, $msg);
+                    }
                 } catch (Exception\ExpiredMessageException $e) {
                     // expired message
                     if ($this->logger) {
@@ -886,8 +899,7 @@ class nsqphp
                 }
             }
 
-            if ($autoDelete)
-            {
+            if ($autoDelete || $filtered) {
                 // mark as done; get next on the way
                 $this->deleteMessage($msg->getId());
             }
@@ -913,6 +925,24 @@ class nsqphp
         }
     }
 
+    private function isFiltered($msg, $connection)
+    {
+        $extFilter = $connection->getExtFilter();
+        if (empty($extFilter)) {
+            return false;
+        }
+        $extends = $msg->getExtends();
+        if (empty($extends)) {
+            return false;
+        }
+        $key = $extFilter[0];
+        $accept = isset($extends[$key]) ? $extends[$key] : null;
+        if ($accept === null) {
+            return false;
+        }
+        return $accept !== $extFilter[1];
+    }
+    
     /**
      * Remove message from queue
      * @param $messageId

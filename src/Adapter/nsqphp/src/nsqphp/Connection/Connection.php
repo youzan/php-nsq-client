@@ -52,6 +52,8 @@ class Connection implements ConnectionInterface
     private $hasExt = false;
 
     private $tag = null;
+    
+    private $extFilter = null;
 
     /**
      * With proxy
@@ -266,6 +268,24 @@ class Connection implements ConnectionInterface
         $this->tag = $tag;
     }
 
+    /**
+     * get ext filter
+     * @return array|null
+     */
+    public function getExtFilter()
+    {
+        return $this->tag;
+    }
+
+    /**
+     * set ext filter
+     * @param array|null $filter
+     */
+    public function setExtFilter($extFilter)
+    {
+        $this->extFilter = $extFilter;
+    }
+    
     /**
      * @return bool
      */

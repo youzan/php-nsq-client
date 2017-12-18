@@ -43,6 +43,10 @@ class Writer
             $data['desired_tag'] = strval($desired_tag);
             //$data['tag_filter'] = strval($desired_tag);
         }
+        if (!empty($ext_filter))
+        {
+            $data['ext_filter'] = ["type" => 1, "filter_ext_key"=> $ext_filter[0], "filter_data"=> $ext_filter[1]];
+        }
         $json = json_encode($data);
         $size = pack('N', strlen($json));
         return $cmd . $size . $json;

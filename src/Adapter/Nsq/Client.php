@@ -113,10 +113,7 @@ class Client implements AdapterInterface
                 $realTopic,
                 $channel,
                 $msgCb,
-                $options['auto_delete'],
-                $options['sub_ordered'],
-                $options['msg_timeout'],
-                $options['tag']
+                $options
             )->run($maxKeepSeconds);
             return false;
         }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);
