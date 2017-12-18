@@ -26,7 +26,7 @@ class nsqphp
     /**
      * VERSION
      */
-    const VERSION = '1.4.0';
+    const VERSION = '1.5.0';
 
     /**
      * Publish "consistency levels" [ish]
@@ -837,6 +837,7 @@ class nsqphp
                 }
                 $this->pendingMessages[$msg->getId()] = ['connection' => $connection, 'raw_id' => $msg->getRawId()];
                 $filtered = $this->isFiltered($msg, $connection);
+                echo "FILTERED: "; var_dump($filtered);
                 try {
                     if (!$filtered) {
                         call_user_func($callback, $msg);

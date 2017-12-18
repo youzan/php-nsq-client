@@ -92,11 +92,17 @@ class MsgFilter
             $target->setTag(strval($serviceChainName));
         }
         $zanTest = $serviceChain['zan_test'] ?: false;
+        $ext = $target->getExtends();
         if ($zanTest !== false) {
-            $ext = $target->getExtends();
             $ext['zan_test'] = true;
-            $target->setExtends($ext);
         }
+        $oriExt = $origin->getAllExtends();
+        if (!empty($oriExt)) {
+            foreach ($oriExt as $k => $v) {
+                $ext[$k] = $v;
+            }
+        }
+        $target->setExtends($ext);
 
         // flows
 

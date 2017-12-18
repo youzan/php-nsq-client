@@ -210,5 +210,10 @@ class Message implements MessageInterface
     {
         return isset($this->extends[$k]) ? $this->extends[$k] : null;
     }
+    
+    public function getAllExtends()
+    {
+        return $this->extends;
+    }
 }
 

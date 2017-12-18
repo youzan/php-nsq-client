@@ -13,9 +13,11 @@ ServiceChain::setAll($svc);
 for ($i = 1;;$i++) {
     $s = 'hello 中文' . $i;
     $message = new Message($s);
+    $message->setExtends('KEY', 'VALUE');
     //$message->setTag('TAG');
     //if (!Queue::push($topic, [$message, $message])) {
-    if (!Queue::bulkPush($topic, [$message])) {
+    if (!Queue::push($topic, $message)) {
+    //if (!Queue::bulkPush($topic, [$message])) {
         echo "Failed!!!: ".Queue::lastPushError();
         break;
     }

@@ -33,20 +33,19 @@ class Writer
         $cmd = $this->command('IDENTIFY');
         extract($params);
         $data = ['client_id' => (string)$client_id, 'hostname' => $hostname, 'user_agent' => $user_agent, 'extend_support' => $extend_support];
-        $msg_timeout = intval($msg_timeout);
-        if ($msg_timeout > 0)
+        if (isset($msg_timeout) && $msg_timeout > 0)
         {
-            $data['msg_timeout'] = $msg_timeout; 
+            $data['msg_timeout'] = intval($msg_timeout);
         }
         if (!empty($desired_tag))
         {
             $data['desired_tag'] = strval($desired_tag);
-            //$data['tag_filter'] = strval($desired_tag);
         }
         if (!empty($ext_filter))
         {
             $data['ext_filter'] = ["type" => 1, "filter_ext_key"=> $ext_filter[0], "filter_data"=> $ext_filter[1]];
         }
+        echo "IDENTIFY:";print_r($data);
         $json = json_encode($data);
         $size = pack('N', strlen($json));
         return $cmd . $size . $json;
