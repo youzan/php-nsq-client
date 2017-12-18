@@ -85,7 +85,7 @@ class MsgFilter
         
         // for publish with service chain
         $serviceChain = ServiceChain::getAll();
-        $serviceChainName = $serviceChain['name'] ?: null;
+        $serviceChainName = isset($serviceChain['name']) ? $serviceChain['name'] : null;
         if ($serviceChainName === null) {
             $target->setTag($origin->getTag());
         } else {
