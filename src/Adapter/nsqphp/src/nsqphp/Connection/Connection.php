@@ -274,7 +274,7 @@ class Connection implements ConnectionInterface
      */
     public function getExtFilter()
     {
-        return $this->tag;
+        return $this->extFilter;
     }
 
     /**

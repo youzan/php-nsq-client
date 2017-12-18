@@ -45,7 +45,6 @@ class Writer
         {
             $data['ext_filter'] = ["type" => 1, "filter_ext_key"=> $ext_filter[0], "filter_data"=> $ext_filter[1]];
         }
-        echo "IDENTIFY:";print_r($data);
         $json = json_encode($data);
         $size = pack('N', strlen($json));
         return $cmd . $size . $json;

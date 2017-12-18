@@ -702,7 +702,7 @@ class nsqphp
                 {
                     $conn->setDesiredTag($tag);
                 }
-                if (!empty($extFilTer))
+                if (!empty($extFilter))
                 {
                     $conn->setExtFilter($extFilter);
                 }
@@ -837,7 +837,6 @@ class nsqphp
                 }
                 $this->pendingMessages[$msg->getId()] = ['connection' => $connection, 'raw_id' => $msg->getRawId()];
                 $filtered = $this->isFiltered($msg, $connection);
-                echo "FILTERED: "; var_dump($filtered);
                 try {
                     if (!$filtered) {
                         call_user_func($callback, $msg);
