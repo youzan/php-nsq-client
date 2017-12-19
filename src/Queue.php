@@ -118,6 +118,14 @@ class Queue
                     $serviceChain = ServiceChain::getAll();
                     $serviceChain['zan_test'] = true;
                     ServiceChain::setAll($serviceChain);
+                } else {
+                    $serviceChain = ServiceChain::getAll();
+                    unset($serviceChain['zan_test']);
+                    if (empty($serviceChain)) {
+                        ServiceChain::clear();
+                    } else {
+                        ServiceChain::setAll($serviceChain);
+                    }
                 }
                 call_user_func_array($callback, [$msg]);
             },
