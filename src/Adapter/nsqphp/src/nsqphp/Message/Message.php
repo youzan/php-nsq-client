@@ -32,7 +32,7 @@ class Message implements MessageInterface
     }
     
     private $extends = [];
- 
+   
     /**
      * Message payload - string
      * 
@@ -231,4 +231,3 @@ class Message implements MessageInterface
         return $this->extends;
     }
 }
-

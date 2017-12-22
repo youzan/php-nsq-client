@@ -82,8 +82,28 @@ class MsgFilter
         }
 
         $target = new NSQMessage($origin->getPayload());
-        $target->setTag($origin->getTag());
         
+        // for publish with service chain
+        $serviceChain = ServiceChain::getAll();
+        $serviceChainName = isset($serviceChain['name']) ? $serviceChain['name'] : null;
+        if ($serviceChainName === null) {
+            $target->setTag($origin->getTag());
+        } else {
+            $target->setTag(strval($serviceChainName));
+        }
+        $zanTest = $serviceChain['zan_test'] ?: false;
+        $ext = $target->getExtends();
+        if ($zanTest !== false) {
+            $ext['zan_test'] = true;
+        }
+        $oriExt = $origin->getAllExtends();
+        if (!empty($oriExt)) {
+            foreach ($oriExt as $k => $v) {
+                $ext[$k] = $v;
+            }
+        }
+        $target->setExtends($ext);
+
         // flows
 
         // s1 - msg tracing

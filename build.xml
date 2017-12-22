@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="kdt-lib/queue" default="build">
+
+    <target name="build"
+            depends="prepare,phpunit"
+            description=""/>
+
+    <target name="build-parallel"
+            depends="prepare,phpunit"
+            description=""/>
+
+    <target name="clean"
+            unless="clean.done"
+            description="Cleanup build artifacts">
+        <delete dir="${basedir}/build/logs"/>
+        <property name="clean.done" value="true"/>
+    </target>
+
+    <target name="prepare"
+            unless="prepare.done"
+            depends="clean"
+            description="Prepare for build">
+        <mkdir dir="${basedir}/build/logs"/>
+        <property name="prepare.done" value="true"/>
+    </target>
+
+    <target name="composer-update"
+            unless="composer-update.done">
+        <exec executable="composer">
+            <arg value="update"/>
+        </exec>
+        <property name="composer-update.done" value="true"/>
+    </target>
+
+    <target name="phpunit"
+            depends="composer-update"
+            description="Run unit tests with PHPUnit">
+        <exec executable="${basedir}/vendor/bin/phpunit" failonerror="true">
+            <arg value="tests"/>
+            <arg value="--repeat"/>
+            <arg value="100"/>
+        </exec>
+    </target>
+</project>

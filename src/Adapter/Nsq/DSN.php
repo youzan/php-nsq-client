@@ -8,6 +8,7 @@
 
 namespace Kdt\Iron\Queue\Adapter\Nsq;
 
+use Kdt\Iron\Queue\Adapter\Nsq\Feature\DCCLookupd;
 use Kdt\Iron\Queue\Exception\InvalidConfigException;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
@@ -116,6 +117,7 @@ class DSN
         {
             return $this->cachedDSNs[$cKey];
         }
+
         $config = $this->balancedPicking($this->config->getGlobalSetting('nsq.server.lookupd.'.$clusterName));
 
         if (is_numeric(strpos($config, '://')))
@@ -131,13 +133,20 @@ class DSN
             $bootDSN = sprintf('%s://%s:%s', $lgProtocol, $lgPath, $lgExt);
         }
 
-        $staticResults = [];
+        $staticResults = $dynamicResults = [];
 
         $bootParsed = parse_url($bootDSN);
-        $discoveredResults = Router::getInstance()->discoveryViaLookupd($bootParsed['host'], $bootParsed['port'] ?: 80);
-        $staticResults = $discoveredResults ?: [$bootDSN];
-        // TODO: inject config by protocol
-        $this->cachedDSNs[$cKey] = $finalResults = [ $staticResults, false ];
+        if ($bootParsed['scheme'] == 'dcc')
+        {
+            $dynamicResults = DCCLookupd::getInstance()->parsing($clusterName, $bootParsed, $topicNamed, $usingScene);
+        }
+        else
+        {
+            $discoveredResults = Router::getInstance()->discoveryViaLookupd($bootParsed['host'], $bootParsed['port'] ?: 80);
+            $staticResults = $discoveredResults ?: [$bootDSN];
+        }
+
+        $this->cachedDSNs[$cKey] = $finalResults = [$dynamicResults ?: $staticResults, $dynamicResults ? true : false];
 
         return $finalResults;
     }

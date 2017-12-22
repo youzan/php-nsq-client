@@ -26,6 +26,11 @@ class Router
     private $config = null;
 
     /**
+     * @var Cache
+     */
+    private $cache = null;
+
+    /**
      * @var array
      */
     private $l2Cache = [];
@@ -60,6 +65,7 @@ class Router
         HA::getInstance()->registerEvent(HA::EVENT_RETRYING, [$this, 'cleanWhenSrvRetrying']);
 
         $this->config = Config::getInstance();
+        $this->cache = Cache::getInstance();
     }
 
     /**
@@ -77,8 +83,13 @@ class Router
         }
         else
         {
-            // TODO: cache
-            $nodes = InstanceMgr::getLookupInstance($topic, 'pub')->lookupHosts($this->config->parseTopicName($topic), 'pub');
+            $nodes = $this->cache->host(
+                sprintf($this->cLookupResultsKey, $topic),
+                function() use ($topic) {
+                    return InstanceMgr::getLookupInstance($topic, 'pub')->lookupHosts($this->config->parseTopicName($topic), 'pub');
+                },
+                $this->config->getGlobalSetting('nsq.mem-cache.lookupResultsTTL', $this->cLookupResultsTTL)
+            );
 
             if (empty($nodes))
             {
@@ -186,8 +197,13 @@ class Router
             try
             {
                 $foundNodes = [];
-                // TODO: cache
-                $dynamicNodes = (new Cluster($seedHost, $seedPort))->getSlaves() ?: [];
+                $dynamicNodes = $this->cache->host(
+                    sprintf($this->cLookupdNodesKey, $seedHost, $seedPort),
+                    function() use ($seedHost, $seedPort) {
+                        return (new Cluster($seedHost, $seedPort))->getSlaves();
+                    },
+                    $this->config->getGlobalSetting('nsq.mem-cache.lookupdNodesTTL', $this->cLookupdNodesTTL)
+                ) ?: [];
 
                 shuffle($dynamicNodes);
                 foreach ($dynamicNodes as $idx => $nodeURL)
@@ -215,6 +231,7 @@ class Router
      */
     public function clearCaches()
     {
+        $this->cache->clear();
         unset($this->l2Cache);
     }
 

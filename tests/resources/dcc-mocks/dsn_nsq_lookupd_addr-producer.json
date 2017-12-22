@@ -1,0 +1,67 @@
+{
+  "##_default_dcc-default": {
+    "current": [
+      "http://127.0.0.3:123"
+    ]
+  },
+  "##_default_dcc-before": {
+    "current": [
+      "http://127.0.0.3:111"
+    ]
+  },
+  "##_default_dcc-moving": {
+    "current": [
+      "http://127.0.0.3:222"
+    ]
+  },
+  "##_default_dcc-finish": {
+    "current": [
+      "http://127.0.0.3:333"
+    ]
+  },
+  "dsn_topic_dcc_before": {
+    "current": [
+      "http://127.0.0.3:1"
+    ]
+  },
+  "dsn_topic_dcc_moving_gray_miss": {
+    "previous": [
+      "http://127.0.0.3:1"
+    ],
+    "current": [
+      "http://127.0.0.3:2"
+    ],
+    "gradation": {
+      "some-else-host": {
+        "percent": 1
+      }
+    }
+  },
+  "dsn_topic_dcc_moving_gray_hit": {
+    "previous": [
+      "http://127.0.0.3:1"
+    ],
+    "current": [
+      "http://127.0.0.3:2"
+    ],
+    "gradation": {
+      "*": {
+        "percent": 100
+      }
+    }
+  },
+  "dsn_topic_dcc_moving_non": {
+    "previous": [
+      "http://127.0.0.3:1"
+    ],
+    "current": [
+      "http://127.0.0.3:2"
+    ],
+    "gradation": {}
+  },
+  "dsn_topic_dcc_finish": {
+    "current": [
+      "http://127.0.0.3:2"
+    ]
+  }
+}
