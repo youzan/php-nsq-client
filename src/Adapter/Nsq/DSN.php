@@ -8,7 +8,6 @@
 
 namespace Kdt\Iron\Queue\Adapter\Nsq;
 
-use Kdt\Iron\Queue\Adapter\Nsq\Feature\DCCLookupd;
 use Kdt\Iron\Queue\Exception\InvalidConfigException;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
@@ -136,15 +135,8 @@ class DSN
         $staticResults = $dynamicResults = [];
 
         $bootParsed = parse_url($bootDSN);
-        if ($bootParsed['scheme'] == 'dcc')
-        {
-            $dynamicResults = DCCLookupd::getInstance()->parsing($clusterName, $bootParsed, $topicNamed, $usingScene);
-        }
-        else
-        {
-            $discoveredResults = Router::getInstance()->discoveryViaLookupd($bootParsed['host'], $bootParsed['port'] ?: 80);
-            $staticResults = $discoveredResults ?: [$bootDSN];
-        }
+        $discoveredResults = Router::getInstance()->discoveryViaLookupd($bootParsed['host'], $bootParsed['port'] ?: 80);
+        $staticResults = $discoveredResults ?: [$bootDSN];
 
         $this->cachedDSNs[$cKey] = $finalResults = [$dynamicResults ?: $staticResults, $dynamicResults ? true : false];
 

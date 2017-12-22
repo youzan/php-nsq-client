@@ -83,15 +83,7 @@ class MsgFilter
 
         $target = new NSQMessage($origin->getPayload());
         
-        // for publish with service chain
-        $serviceChain = ServiceChain::getAll();
-        $serviceChainName = isset($serviceChain['name']) ? $serviceChain['name'] : null;
-        if ($serviceChainName === null) {
-            $target->setTag($origin->getTag());
-        } else {
-            $target->setTag(strval($serviceChainName));
-        }
-        $zanTest = $serviceChain['zan_test'] ?: false;
+        $target->setTag($origin->getTag());
         $ext = $target->getExtends();
         if ($zanTest !== false) {
             $ext['zan_test'] = true;

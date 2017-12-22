@@ -9,7 +9,6 @@
 namespace Kdt\Iron\Queue;
 
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
-use Kdt\Iron\Queue\Adapter\Nsq\ServiceChain;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
 
 class Queue
@@ -97,12 +96,7 @@ class Queue
         $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
         $options['msg_timeout'] = isset($options['msg_timeout']) ? intval($options['msg_timeout']) : null;
 
-        $serviceChainName = ServiceChain::get(true);
-        if ($serviceChainName !== null) {
-            $options['tag'] = strval($serviceChainName);
-        } else {
-            $options['tag'] = isset($options['tag']) ? trim($options['tag']) : null;
-        }
+        $options['tag'] = isset($options['tag']) ? trim($options['tag']) : null;
         
         // pop
         return self::nsq()->pop
@@ -110,20 +104,6 @@ class Queue
             $topic,
             function (MessageInterface $msg) use ($callback)
             {
-                $zanTest = $msg->getExtends('zan_test');
-                if ($zanTest) {
-                    $serviceChain = ServiceChain::getAll();
-                    $serviceChain['zan_test'] = true;
-                    ServiceChain::setAll($serviceChain);
-                } else {
-                    $serviceChain = ServiceChain::getAll();
-                    unset($serviceChain['zan_test']);
-                    if (empty($serviceChain)) {
-                        ServiceChain::clear();
-                    } else {
-                        ServiceChain::setAll($serviceChain);
-                    }
-                }
                 call_user_func_array($callback, [$msg]);
             },
             $options
