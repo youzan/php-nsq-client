@@ -11,7 +11,6 @@ namespace Kdt\Iron\Queue;
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Adapter\Nsq\ServiceChain;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
-use Kdt\Iron\Tracing\Sample\Scene\MQ;
 
 class Queue
 {
@@ -43,9 +42,7 @@ class Queue
         $options['max_retry'] = isset($options['max_retry']) ? $options['max_retry'] : 3;
         $options['retry_delay_ms'] = isset($options['retry_delay_ms']) ? $options['retry_delay_ms'] : 10;
         // push
-        $TID = MQ::actionBegin($topic, 'publish');
         $result = self::nsq()->push($topic, $message, $options);
-        MQ::actionFinish($TID);
         if ($result['error_code'])
         {
             self::$lastPushError = $result['error_message'];

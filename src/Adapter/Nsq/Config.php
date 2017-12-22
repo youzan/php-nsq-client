@@ -11,8 +11,6 @@ namespace Kdt\Iron\Queue\Adapter\Nsq;
 use Kdt\Iron\Queue\Exception\InvalidConfigException;
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
-use Config as IronConfig;
-
 use Exception as SysException;
 
 class Config
@@ -24,6 +22,7 @@ class Config
      */
     private $topicMapCaches = [];
 
+    private $globalSetting = [];
     /**
      * Config constructor.
      */
@@ -99,7 +98,12 @@ class Config
      */
     public function getGlobalSetting($key, $default = null)
     {
-        return IronConfig::get($key) ?: $default;
+        return $this->globalSetting[$key] ?: $default;
+    }
+
+    public function setGlobalSetting($setting)
+    {
+        $this->globalSetting = $setting;
     }
 
     /**
@@ -107,7 +111,7 @@ class Config
      */
     public function cleanWhenSrvRetrying(SysException $e)
     {
-        $this->clearTopicCache();
+        //$this->clearTopicCache();
     }
 
     /**
@@ -118,133 +122,128 @@ class Config
     private function getTopicGroupConfig($topicParsed)
     {
         $groupName = $this->extractTopicGroup($topicParsed);
-
         if (isset($this->topicMapCaches[$groupName]))
         {
             $mapping = $this->topicMapCaches[$groupName];
         }
         else
         {
-            $confPath = RESOURCE_PATH . 'nsq/'.$groupName.'.php';
-            if (is_file($confPath))
+            throw new InvalidConfigException('Missing nsq-topic config', 9997);
+        }
+        return $mapping;
+    }
+
+    /**
+     * @param $config array topic config
+     */
+    public function addTopicConfig($groupName, $config) {
+        // lookupd pool
+        $lookupdServers = [];
+        $lookupdPool = [];
+        $lookupdBiz = $config['lookupd_pool'];
+        foreach ($lookupdBiz as $arrayKey => $arrayVal)
+        {
+            // kv style
+            if (is_numeric($arrayKey))
             {
-                $config = require $confPath;
+                // ['global']
+                $lookupdName = $arrayVal;
+                $rwLimit = 'rw';
             }
             else
             {
-                throw new InvalidConfigException('Missing nsq-topic config file', 9997);
+                // ['global' => 'rw']
+                $lookupdName = $arrayKey;
+                $rwLimit = $arrayVal;
             }
 
-            // lookupd pool
-            $lookupdServers = [];
-            $lookupdPool = [];
-            $lookupdBiz = $config['lookupd_pool'];
-            foreach ($lookupdBiz as $arrayKey => $arrayVal)
+            $lookupdDSN = '@self';
+            $lookupdServers[$lookupdName] = $lookupdDSN;
+
+            // rw pool
+            if ($rwLimit == 'r' || $rwLimit == 'rw')
             {
-                // kv style
-                if (is_numeric($arrayKey))
-                {
-                    // ['global']
-                    $lookupdName = $arrayVal;
-                    $rwLimit = 'rw';
-                }
-                else
-                {
-                    // ['global' => 'rw']
-                    $lookupdName = $arrayKey;
-                    $rwLimit = $arrayVal;
-                }
-
-                $lookupdDSN = '@self';
-                $lookupdServers[$lookupdName] = $lookupdDSN;
-
-                // rw pool
-                if ($rwLimit == 'r' || $rwLimit == 'rw')
-                {
-                    $lookupdPool['r'][$lookupdName] = $lookupdDSN;
-                }
-                if ($rwLimit == 'w' || $rwLimit == 'rw')
-                {
-                    $lookupdPool['w'][$lookupdName] = $lookupdDSN;
-                }
+                $lookupdPool['r'][$lookupdName] = $lookupdDSN;
             }
-
-            // sharding enables
-            $shardingEnables = isset($config['sharding_enabled']) ? $config['sharding_enabled'] : [];
-
-            // rw strategy
-            $rwStrategy = isset($config['rw_strategy']) ? $config['rw_strategy'] : [];
-
-            // mixing config
-            $mapping = [];
-
-            foreach ($config['topic'] as $topicBiz => $topicNsq)
+            if ($rwLimit == 'w' || $rwLimit == 'rw')
             {
-                $scopeName = $groupName;
-                $lookupdCopy = $lookupdPool;
-                $shardingMsg = false;
+                $lookupdPool['w'][$lookupdName] = $lookupdDSN;
+            }
+        }
 
-                if (isset($rwStrategy[$topicBiz]))
+        // sharding enables
+        $shardingEnables = isset($config['sharding_enabled']) ? $config['sharding_enabled'] : [];
+
+        // rw strategy
+        $rwStrategy = isset($config['rw_strategy']) ? $config['rw_strategy'] : [];
+
+        // mixing config
+        $mapping = [];
+
+        foreach ($config['topic'] as $topicBiz => $topicNsq)
+        {
+            $scopeName = $groupName;
+            $lookupdCopy = $lookupdPool;
+            $shardingMsg = false;
+
+            if (isset($rwStrategy[$topicBiz]))
+            {
+                $scopeName = $topicBiz;
+                foreach ($rwStrategy[$topicBiz] as $lookupdName => $rwLimit)
                 {
-                    $scopeName = $topicBiz;
-                    foreach ($rwStrategy[$topicBiz] as $lookupdName => $rwLimit)
+                    $appendR = $appendW = $removeR = $removeW = false;
+                    $lookupdDSN = '@self';
+                    switch ($rwLimit)
                     {
-                        $appendR = $appendW = $removeR = $removeW = false;
-                        $lookupdDSN = '@self';
-                        switch ($rwLimit)
-                        {
-                            case 'r':
-                                $appendR = true;
-                                $removeW = true;
-                                break;
-                            case 'w':
-                                $appendW = true;
-                                $removeR = true;
-                                break;
-                            case 'rw':
-                                $appendR = $appendW = true;
-                                break;
-                            default:
-                                $removeR = $removeW = true;
-                                break;
-                        }
-                        if ($appendR && !isset($lookupdCopy['r'][$lookupdName]))
-                        {
-                            $lookupdCopy['r'][$lookupdName] = $lookupdDSN;
-                        }
-                        if ($appendW && !isset($lookupdCopy['w'][$lookupdName]))
-                        {
-                            $lookupdCopy['w'][$lookupdName] = $lookupdDSN;
-                        }
-                        if ($removeR)
-                        {
-                            unset($lookupdCopy['r'][$lookupdName]);
-                        }
-                        if ($removeW)
-                        {
-                            unset($lookupdCopy['w'][$lookupdName]);
-                        }
+                        case 'r':
+                            $appendR = true;
+                            $removeW = true;
+                            break;
+                        case 'w':
+                            $appendW = true;
+                            $removeR = true;
+                            break;
+                        case 'rw':
+                            $appendR = $appendW = true;
+                            break;
+                        default:
+                            $removeR = $removeW = true;
+                            break;
+                    }
+                    if ($appendR && !isset($lookupdCopy['r'][$lookupdName]))
+                    {
+                        $lookupdCopy['r'][$lookupdName] = $lookupdDSN;
+                    }
+                    if ($appendW && !isset($lookupdCopy['w'][$lookupdName]))
+                    {
+                        $lookupdCopy['w'][$lookupdName] = $lookupdDSN;
+                    }
+                    if ($removeR)
+                    {
+                        unset($lookupdCopy['r'][$lookupdName]);
+                    }
+                    if ($removeW)
+                    {
+                        unset($lookupdCopy['w'][$lookupdName]);
                     }
                 }
-
-                if (isset($shardingEnables[$topicBiz]))
-                {
-                    $shardingMsg = $shardingEnables[$topicBiz] ? true : false;
-                }
-
-                $mapping[$topicBiz] = [
-                    'group' => $groupName,
-                    'scope' => $scopeName,
-                    'name' => $topicBiz,
-                    'topic' => $topicNsq,
-                    'sharding' => $shardingMsg,
-                    'lookups' => $lookupdCopy
-                ];
             }
 
-            $this->topicMapCaches[$groupName] = $mapping;
+            if (isset($shardingEnables[$topicBiz]))
+            {
+                $shardingMsg = $shardingEnables[$topicBiz] ? true : false;
+            }
+
+            $mapping[$topicBiz] = [
+                'group' => $groupName,
+                'scope' => $scopeName,
+                'name' => $topicBiz,
+                'topic' => $topicNsq,
+                'sharding' => $shardingMsg,
+                'lookups' => $lookupdCopy
+            ];
         }
-        return $mapping;
+        $this->topicMapCaches[$groupName] = $mapping;
     }
 
     /**

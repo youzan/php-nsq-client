@@ -3,11 +3,9 @@ require 'init.php';
 
 use Kdt\Iron\Queue\Queue;
 use Kdt\Iron\Queue\Message;
-use Kdt\Iron\Queue\Adapter\Nsq\ServiceChain;
 
 $result = Queue::pop([$topic, $channel], function($message) {
     printf("[%s]%s: %s\n", $message->getId(), $message->getTag(), var_export($message->getPayload(), true));
-    //var_dump(ServiceChain::getAll());    
     //var_dump($message);
     //Queue::exitPop();
     echo $message->getExtends('KEY'), "\n";
