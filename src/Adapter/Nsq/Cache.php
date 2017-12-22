@@ -54,7 +54,7 @@ class Cache
     {
         foreach ($this->history as $idx => $type)
         {
-            if ($type == 'host' && $this->mcInstance->del($idx))
+            if ($type == 'host' && $this->del($idx))
             {
                 unset($this->history[$idx]);
             }
