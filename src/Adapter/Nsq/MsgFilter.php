@@ -9,7 +9,6 @@
 namespace Kdt\Iron\Queue\Adapter\Nsq;
 
 use Kdt\Iron\Queue\Adapter\Nsq\Feature\MsgSharding;
-use Kdt\Iron\Queue\Adapter\Nsq\Feature\MsgTracing;
 
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
@@ -20,10 +19,6 @@ class MsgFilter
 {
     use SingleInstance;
 
-    /**
-     * @var MsgTracing
-     */
-    private $msgTracing = null;
 
     /**
      * @var MsgSharding
@@ -35,7 +30,6 @@ class MsgFilter
      */
     public function __construct()
     {
-        $this->msgTracing = MsgTracing::getInstance();
         $this->msgSharding = MsgSharding::getInstance();
     }
 
@@ -82,13 +76,20 @@ class MsgFilter
         }
 
         $target = new NSQMessage($origin->getPayload());
-        $target->setTag($origin->getTag());
         
-        // flows
+        $target->setTag($origin->getTag());
+        $ext = $target->getExtends();
+        if ($zanTest !== false) {
+            $ext['zan_test'] = true;
+        }
+        $oriExt = $origin->getAllExtends();
+        if (!empty($oriExt)) {
+            foreach ($oriExt as $k => $v) {
+                $ext[$k] = $v;
+            }
+        }
+        $target->setExtends($ext);
 
-        // s1 - msg tracing
-        $this->msgTracing->process($topic, $origin, $target, $inBag);
-        // s2 - msg sharding
         $this->msgSharding->process($topic, $origin, $target, $inBag);
 
         // finish

@@ -116,6 +116,7 @@ class DSN
         {
             return $this->cachedDSNs[$cKey];
         }
+
         $config = $this->balancedPicking($this->config->getGlobalSetting('nsq.server.lookupd.'.$clusterName));
 
         if (is_numeric(strpos($config, '://')))
@@ -131,13 +132,13 @@ class DSN
             $bootDSN = sprintf('%s://%s:%s', $lgProtocol, $lgPath, $lgExt);
         }
 
-        $staticResults = [];
+        $staticResults = $dynamicResults = [];
 
         $bootParsed = parse_url($bootDSN);
         $discoveredResults = Router::getInstance()->discoveryViaLookupd($bootParsed['host'], $bootParsed['port'] ?: 80);
         $staticResults = $discoveredResults ?: [$bootDSN];
-        // TODO: inject config by protocol
-        $this->cachedDSNs[$cKey] = $finalResults = [ $staticResults, false ];
+
+        $this->cachedDSNs[$cKey] = $finalResults = [$dynamicResults ?: $staticResults, $dynamicResults ? true : false];
 
         return $finalResults;
     }

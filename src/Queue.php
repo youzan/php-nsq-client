@@ -10,7 +10,6 @@ namespace Kdt\Iron\Queue;
 
 use Kdt\Iron\Queue\Adapter\Nsq\Client;
 use Kdt\Iron\Queue\Interfaces\MessageInterface;
-use Kdt\Iron\Tracing\Sample\Scene\MQ;
 
 class Queue
 {
@@ -32,7 +31,7 @@ class Queue
     /**
      * queue msg publish
      * @param $topic
-     * @param $message
+     * @param Message|Message[] $message
      * @param $options
      * @return bool
      */
@@ -57,7 +56,7 @@ class Queue
     /**
      * queue msg publish (bulk)
      * @param $topic
-     * @param $messages
+     * @param Message[] $messages
      * @param $options
      * @return bool
      */
@@ -96,6 +95,7 @@ class Queue
         $options['sub_ordered'] = isset($options['sub_ordered']) ? $options['sub_ordered'] : false;
         $options['sub_partition'] = isset($options['sub_partition']) ? $options['sub_partition'] : null;
         $options['msg_timeout'] = isset($options['msg_timeout']) ? intval($options['msg_timeout']) : null;
+
         $options['tag'] = isset($options['tag']) ? trim($options['tag']) : null;
         
         // pop

@@ -57,4 +57,21 @@ interface MessageInterface
      * @return static
      */
     public function setShardingProof($sample);
+    
+    /**
+     * @param $tag
+     * @return static
+     */
+    public function setTag($tag);
+    
+    /**
+     * msg tag
+     * @return string
+     */
+    public function getTag();
+    
+    public function setExtends($k, $v);
+    
+    public function getExtends($k);
+    
 }

@@ -1,8 +1,13 @@
 {
-  "name": "youzan/nsq-client",
-  "config":{  },
+  "name": "kdt-lib/queue",
+  "repositories": {"packagist": {"type": "composer", "url": "http://packagist.qima-inc.com"}},
+  "config": { "secure-http": false },
   "require": {
-    "react/react": ">=0.2.1"
+    "react/react": ">=0.2.1",
+    "kdt-lib/cache": "~1.0.0",
+    "kdt-lib/config": "~1.0.0",
+    "kdt-lib/tracing": "~1.0.0",
+    "zanphp/service-chain": "1.0.0"
   },
   "require-dev": {
     "phpunit/phpunit": "5.2.9"
@@ -16,7 +21,9 @@
     }
   },
   "autoload-dev": {
-    "psr-4": {}
+    "psr-4": {
+      "Kdt\\Iron\\Queue\\Tests\\": "tests/source",
+      "Kdt\\Iron\\Queue\\Tests\\classes\\": "tests/classes"
+    }
   }
 }
-

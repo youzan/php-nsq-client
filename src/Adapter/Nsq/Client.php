@@ -39,14 +39,11 @@ class Client implements AdapterInterface
      */
     public function push($topic, $message, array $options = [])
     {
-
+        
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $message) {
             $inst = InstanceMgr::getPubInstance($topic);
-            return $inst->publish(
-                $this->config->parseTopicName($topic),
-                MsgFilter::getInstance()->getMsgObject($topic, $message)
-            );
-
+            $msgObj = MsgFilter::getInstance()->getMsgObject($topic, $message);
+            return $inst->publish($this->config->parseTopicName($topic), $msgObj);
         }, $topic, $options['max_retry'], $options['retry_delay_ms']);
 
         return $this->makePubResult($topic, $result);
@@ -61,16 +58,14 @@ class Client implements AdapterInterface
     public function bulk($topic, array $messages, array $options = [])
     {
         $result = HA::getInstance()->pubRetrying(function () use ($topic, $messages) {
-
-            return InstanceMgr::getPubInstance($topic)->publish(
-                $this->config->parseTopicName($topic),
-                MsgFilter::getInstance()->getMsgObjectBag($topic, $messages)
-            );
-
+            $inst = InstanceMgr::getPubInstance($topic);
+            $msgObj = MsgFilter::getInstance()->getMsgObjectBag($topic, $messages);
+            return $inst->publish($this->config->parseTopicName($topic), $msgObj);
         }, $topic, $options['max_retry'], $options['retry_delay_ms']);
 
         return $this->makePubResult($topic, $result);
     }
+
 
     /**
      * @param $topic
@@ -89,6 +84,7 @@ class Client implements AdapterInterface
         {
             $channel = 'default';
         }
+
         $identify = $this->config->parseTopicName($topic).'-'.$channel;
         $msgCb = function (NsqMessage $m) use ($callback)
                 {
@@ -96,16 +92,19 @@ class Client implements AdapterInterface
                             $m->getId(),
                             $m->getTimestamp(),
                             $m->getAttempts(),
-                            $m->getPayload()
+                            $m->getPayload(),
+                            $m->getExtends()
                         ))
                         ->setTraceID(intval($m->getTraceId()))
                         ->setTag($m->getTag());
                     $callback($msg);
                 };
-        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $msgCb, $options) {
+
+        return HA::getInstance()->subRetrying(function ($maxKeepSeconds) use ($topic, $channel, $msgCb, $options) 
+        {
             $lookupResult = Router::getInstance()->fetchSubscribeNodes($topic, $options['sub_partition']);
             $meta = current($lookupResult)['meta'];
-            if (!$meta['extend_support']) {
+            if (!isset($meta['extend_support']) || !$meta['extend_support']) {
                 $options['tag'] = null;
             }
             $realTopic = $this->config->parseTopicName($topic);
@@ -114,13 +113,9 @@ class Client implements AdapterInterface
                 $realTopic,
                 $channel,
                 $msgCb,
-                $options['auto_delete'],
-                $options['sub_ordered'],
-                $options['msg_timeout'],
-                $options['tag']
+                $options
             )->run($maxKeepSeconds);
             return false;
-
         }, $identify, $options['keep_seconds'], $options['max_retry'], $options['retry_delay']);
     }
 
