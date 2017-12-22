@@ -8,10 +8,6 @@
 
 namespace Kdt\Iron\Queue\Adapter\Nsq;
 
-use Kdt\Iron\Cache\Contract\Protocol\Memory;
-use Kdt\Iron\Cache\Foundation\Options;
-use Kdt\Iron\Cache\Provider\Memory as Provider;
-
 use Kdt\Iron\Queue\Foundation\Traits\SingleInstance;
 
 class Cache
@@ -21,29 +17,34 @@ class Cache
     /**
      * @var Memory
      */
-    private $mcInstance = null;
+    private $m = [];
 
     /**
      * @var string
      */
-    private $mcApp = '#kdt-iron-queue';
-
-    /**
-     * @var string
-     */
-    private $mcModule = 'nsq-client';
+    private $prefix = '#nsq-client-';
 
     /**
      * @var array
      */
     private $history = [];
 
+
+    private function hasApcu()
+    {
+        static $ret;
+        if (!isset($ret))
+        {
+            $ret = extension_loaded('apcu') && function_exists('apcu_enabled') && apcu_enabled();
+        }
+        return $ret;
+    }
+
     /**
      * Cache constructor.
      */
     public function __construct()
     {
-        $this->mcInstance = Provider::getInstance($this->mcApp, $this->mcModule, Options::MEMORY_ALLOW_LEGACY);
     }
 
     /**
@@ -69,7 +70,59 @@ class Cache
     public function host($key, callable $callback, $ttl)
     {
         $this->history[$key] = 'host';
+        $ret = $this->get($key);
+        if ($ret !== null)
+        {
+            return $ret;
+        }
+        $ret = call_user_func($callback);
+        if (is_null($ret))
+        {
+            return null;
+        }
+        $this->set($key, $ret, $ttl);
+        return $ret;
+    }
 
-        return $this->mcInstance->host($key, $callback, $ttl);
+    private function get($key)
+    {
+        if ($this->hasApcu())
+        {
+            $ok = false;
+            $result = apcu_fetch($this->prefix . $key, $ok);
+            if ($ok)
+            {
+                return $result;
+            }
+        }
+        else
+        {
+            return isset($this->m[$key]) ? $this->m[$key] : null;
+        }
+    }
+   
+    private function del($key)
+    {
+        if ($this->hasApcu())
+        {
+            return apcu_delete($this->prefix . $key);
+        }
+        else
+        {
+            unset($this->m[$key]);
+        }
+    }
+
+    private function set($key, $value, $ttl)
+    {
+        if ($this->hasApcu())
+        {
+            return apcu_store($this->prefix . $key, $value, $ttl);
+        }
+        else
+        {
+            $this->m[$key] = $value;
+        }
     }
 }
+

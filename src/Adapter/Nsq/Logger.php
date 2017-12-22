@@ -8,11 +8,12 @@
 
 namespace Kdt\Iron\Queue\Adapter\Nsq;
 
-use Kdt\Iron\Log\Log;
 use nsqphp\Logger\LoggerInterface;
 
 class Logger implements LoggerInterface
 {
+    private static $type = 'php';
+    
     /**
      * Log error
      *
@@ -20,7 +21,7 @@ class Logger implements LoggerInterface
      */
     public function error($msg)
     {
-        $this->getLogger()->error($this->msg($msg));
+        $this->log('error', $msg);
     }
 
     /**
@@ -30,7 +31,7 @@ class Logger implements LoggerInterface
      */
     public function warn($msg)
     {
-        $this->getLogger()->warn($this->msg($msg));
+        $this->log('warn', $msg);
     }
 
     /**
@@ -40,7 +41,7 @@ class Logger implements LoggerInterface
      */
     public function info($msg)
     {
-        $this->getLogger()->info($this->msg($msg));
+        $this->log('info', $msg);
     }
 
     /**
@@ -50,34 +51,25 @@ class Logger implements LoggerInterface
      */
     public function debug($msg)
     {
-        $msgOrigin = $this->msg($msg);
-        $msgLength = strlen($msgOrigin);
-        if ($msgLength > 128)
-        {
-            $this->getLogger()->debug(substr($msgOrigin, 0, 128), null, ['origin' => $msgOrigin]);
-        }
-        else
-        {
-            $this->getLogger()->debug($msgOrigin);
-        }
+        $this->log('debug', $msg);
     }
 
-    /**
-     * @return \Kdt\Iron\Log\Track\TrackLogger
-     */
-    private function getLogger()
+    private function log($level, $msg)
     {
-        return Log::getInstance('php-framework', 'nsq.client');
+        $s = $msg instanceof \Exception ? $msg->getMessage() : (string)$msg;
+        switch ($this->type)
+        {
+        case 'php':
+            error_log(strtoupper($level).' '.$s);
+            break;
+        case 'stderr':
+            fwrite(STDERR, sprintf('[%s] %s: %s%s', date('Y-m-d H:i:s'), strtoupper($level), $s, PHP_EOL));
+            break;
+        } 
     }
 
-    /**
-     * Msg convert
-     *
-     * @param string|\Exception $content
-     * @return string
-     */
-    private function msg($content)
+    private function setType($type)
     {
-        return $content instanceof \Exception ? $content->getMessage() : (string)$content;
+        $this->type = $type;
     }
 }
